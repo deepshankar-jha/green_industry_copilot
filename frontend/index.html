@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!--
+    =====================================================
+    Page Metadata
+    Contains document settings and external CSS resources.
+    =====================================================
+    -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Industry Copilot</title>
+
+    <!-- Main stylesheet for landing page UI -->
+    <link rel="stylesheet" href="css/landing_page.css">
+</head>
+
+<body class="gic-page">
+    <!--
+    =====================================================
+    Main Application Container
+    Wraps all visible page components.
+    =====================================================
+    -->
+    <div class="container">
+        <!--
+        Application Logo/Icon
+        Displayed at the top of the page.
+        -->
+        <div class="logo">
+            🌿
+        </div>
+
+        <!--
+        Main Heading
+        Product title with highlighted branding.
+        -->
+        <h1 class="gic-title">
+            Green Industry <span class="highlight">Copilot</span>
+        </h1>
+
+        <!--
+        Description Section
+        Explains the purpose and capabilities of the application.
+        -->
+        <p class="subtitle">
+            Upload process documents, spreadsheets, reports, and engineering files.
+            Let AI analyze emissions, energy consumption, water usage, and byproducts
+            across your industrial processes.
+        </p>
+
+        <!--
+        =====================================================
+        File Upload Card
+        Contains drag-and-drop area and upload controls.
+        =====================================================
+        -->
+        <div class="upload-card">
+            <!--
+            Drop Zone Area
+            Central section used for file selection and upload.
+            -->
+            <div class="drop-zone">
+                <!-- Upload Icon -->
+                <div class="upload-icon">
+                    📂
+                </div>
+
+                <!-- Upload Section Heading -->
+                <h2>Upload Multiple Files</h2>
+
+                <!-- Instructions for users -->
+                <p>
+                    Drag & drop files here or click the button below
+                </p>
+
+                <!--
+                Choose Files Button
+
+                Opens the hidden file input element.
+                Event handling is implemented in file_uploader.js.
+                -->
+                <button id="chooseBtn">
+                    Choose Files
+                </button>
+
+                <!--
+                Hidden File Input
+
+                Allows selection of multiple files.
+                Controlled programmatically by chooseBtn.
+                -->
+                <input type="file" id="files" multiple>
+
+                <!--
+                Selected File List
+
+                Dynamically populated by file_uploader.js.
+                Displays uploaded filenames and remove buttons.
+                -->
+                <div class="file-list" id="fileList"></div>
+
+                <!--
+                Submit Button
+
+                Appears after at least one file is selected.
+                Initiates upload process to the backend server.
+                -->
+                <button id="submitBtn" class="submit-btn">
+                    Submit Files
+                </button>
+
+            </div>
+
+        </div>
+        <!--
+        Footer Section
+        Displays application tagline.
+        -->
+        <div class="footer">
+            AI-powered sustainability intelligence for industrial operations
+        </div>
+    </div>
+    <!--
+    =====================================================
+    JavaScript Dependencies
+    =====================================================
+
+    socket.io.js
+        Socket.IO client library.
+
+    file_uploader.js
+        Handles file selection, display and upload logic.
+
+    socket_manager.js
+        Maintains socket connection with backend services.
+
+    app.js
+        Main application controller coordinating modules.
+
+    main.js
+        Application entry point.
+    -->
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="js/file_uploader.js"></script>
+    <script src="js/socket_manager.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
