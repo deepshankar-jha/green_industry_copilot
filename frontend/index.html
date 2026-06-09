@@ -14,6 +14,8 @@
 
     <!-- Main stylesheet for landing page UI -->
     <link rel="stylesheet" href="css/landing_page.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/processing_overlay.css">
 </head>
 
 <body class="gic-page">
@@ -23,103 +25,167 @@
     Wraps all visible page components.
     =====================================================
     -->
-    <div class="container">
-        <!--
+    <div id="landingPage" class="landing-page">
+        <div class="container">
+            <!--
         Application Logo/Icon
         Displayed at the top of the page.
         -->
-        <div class="logo">
-            🌿
-        </div>
+            <div class="logo">
+                🌿
+            </div>
 
-        <!--
+            <!--
         Main Heading
         Product title with highlighted branding.
         -->
-        <h1 class="gic-title">
-            Green Industry <span class="highlight">Copilot</span>
-        </h1>
+            <h1 class="gic-title">
+                Green Industry <span class="highlight">Copilot</span>
+            </h1>
 
-        <!--
+            <!--
         Description Section
         Explains the purpose and capabilities of the application.
         -->
-        <p class="subtitle">
-            Upload process documents pdf,word etc.
-            Let AI analyze emissions, energy consumption, water usage, and byproducts
-            across your industrial processes.
-        </p>
+            <p class="subtitle">
+                Upload process documents pdf,word etc.
+                Let AI analyze emissions, energy consumption, water usage, and byproducts
+                across your industrial processes.
+            </p>
 
-        <!--
+            <!--
         =====================================================
         File Upload Card
         Contains drag-and-drop area and upload controls.
         =====================================================
         -->
-        <div class="upload-card">
-            <!--
+            <div class="upload-card">
+                <!--
             Drop Zone Area
             Central section used for file selection and upload.
             -->
-            <div class="drop-zone">
-                <!-- Upload Icon -->
-                <div class="upload-icon">
-                    📂
-                </div>
+                <div class="drop-zone">
+                    <!-- Upload Icon -->
+                    <div class="upload-icon">
+                        📂
+                    </div>
 
-                <!-- Upload Section Heading -->
-                <h2>Upload Single File</h2>
+                    <!-- Upload Section Heading -->
+                    <h2>Upload Single File</h2>
 
-                <!-- Instructions for users -->
-                <p>
-                    click the button below
-                </p>
+                    <!-- Instructions for users -->
+                    <p>
+                        click the button below
+                    </p>
 
-                <!--
+                    <!--
                 Choose Files Button
 
                 Opens the hidden file input element.
                 Event handling is implemented in file_uploader.js.
                 -->
-                <button id="chooseBtn">
-                    Choose File
-                </button>
+                    <button id="chooseBtn">
+                        Choose File
+                    </button>
 
-                <!--
+                    <!--
                 Hidden File Input
 
                 Allows selection of single file.
                 Controlled programmatically by chooseBtn.
                 -->
-                <input type="file" id="files">
+                    <input type="file" id="files">
 
-                <!--
+                    <!--
                 Selected File List
 
                 Dynamically populated by file_uploader.js.
                 Displays uploaded filenames and remove buttons.
                 -->
-                <div class="file-list" id="fileList"></div>
+                    <div class="file-list" id="fileList"></div>
 
-                <!--
+                    <!--
                 Submit Button
 
                 Appears after at least one file is selected.
                 Initiates upload process to the backend server.
                 -->
-                <button id="submitBtn" class="submit-btn">
-                    Submit File
-                </button>
+                    <button id="submitBtn" class="submit-btn">
+                        Submit File
+                    </button>
+
+                </div>
+
+            </div>
+            <!--
+        Footer Section
+        Displays application tagline.
+        -->
+            <div class="footer">
+                AI-powered sustainability intelligence for industrial operations
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard" class="dashboard-page hidden">
+
+        <!-- Top Bar -->
+        <div class="dashboard-navbar">
+
+            <button id="backBtn" class="back-btn">
+                Back
+            </button>
+
+            <div class="dashboard-title">
+                Green Industry Copilot
+            </div>
+
+        </div>
+
+        <!-- Main Layout -->
+        <div class="dashboard-main">
+
+            <!-- Workspace Panel -->
+            <div class="workspace-panel">
+
+                <!-- Workspace selector -->
+                <div class="workspace-toolbar">
+
+                    <select id="workspaceSelect">
+                        <option>Workspace 1</option>
+                        <option>Workspace 2</option>
+                        <option>Workspace 3</option>
+                    </select>
+
+                </div>
+
+                <!-- Workspace content -->
+                <div class="workspace-content">
+
+                    Workspace Panel
+
+                </div>
+
+            </div>
+
+            <!-- Chat -->
+            <div class="chat-panel">
+
+                Chat UI
 
             </div>
 
         </div>
-        <!--
-        Footer Section
-        Displays application tagline.
-        -->
-        <div class="footer">
-            AI-powered sustainability intelligence for industrial operations
+
+    </div>
+
+    <!-- Processing Overlay -->
+    <div id="processingOverlay" class="processing-overlay">
+        <div class="processing-box">
+            <div class="spinner"></div>
+            <div class="processing-text">
+                Processing document...
+            </div>
         </div>
     </div>
     <!--

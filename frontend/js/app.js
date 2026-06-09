@@ -35,6 +35,8 @@ class Application {
     this.initializeSocket();
 
     this.registerEvents();
+
+    this.registerBackButton();
   }
 
   /**
@@ -85,6 +87,14 @@ class Application {
     );
 
     this.socketManager.on("chat_response", (data) => this.onChatResponse(data));
+
+    this.socketManager.on("process_extracted", (data) =>
+      this.onProcessExtracted(data),
+    );
+
+    this.socketManager.on("process_status", (data) =>
+      this.onProcessStatus(data),
+    );
   }
 
   /**
@@ -109,25 +119,20 @@ class Application {
       return;
     }
 
+    this.showProcessingOverlay();
+
     const formData = new FormData();
 
     formData.append("file", file);
+    formData.append("socket_id", this.socketManager.getSocketId());
 
     fetch("/upload", {
       method: "POST",
       body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Upload started");
-
-        this.socketManager.emit("upload_started", {
-          file: file.name,
-        });
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    }).catch((err) => {
+      this.hideProcessingOverlay();
+      console.error(err);
+    });
   }
 
   /**
@@ -164,5 +169,40 @@ class Application {
     console.log("AI response:", data);
 
     // update chat window
+  }
+
+  onProcessExtracted(data) {
+    console.log("Processes extracted");
+    console.log(data.processes);
+
+    this.hideProcessingOverlay();
+
+    this.showDashboard();
+  }
+
+  onProcessStatus(data) {
+    console.log(`[${data.status}] ${data.message}`);
+  }
+
+  showDashboard() {
+    document.getElementById("landingPage").classList.add("hidden");
+
+    document.getElementById("dashboard").classList.remove("hidden");
+  }
+
+  showProcessingOverlay() {
+    document.getElementById("processingOverlay").style.display = "flex";
+  }
+
+  hideProcessingOverlay() {
+    document.getElementById("processingOverlay").style.display = "none";
+  }
+
+  registerBackButton() {
+    document.getElementById("backBtn").addEventListener("click", () => {
+      document.getElementById("dashboard").classList.add("hidden");
+
+      document.getElementById("landingPage").classList.remove("hidden");
+    });
   }
 }

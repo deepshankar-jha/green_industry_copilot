@@ -1,0 +1,113 @@
+/* =========================
+   Dashboard
+========================= */
+
+.dashboard-page{
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+}
+
+/* ---------- top bar ---------- */
+
+.dashboard-page .dashboard-navbar{
+    height:70px;
+
+    display:flex;
+    align-items:center;
+
+    border-bottom:2px solid black;
+
+    padding:0 20px;
+
+    background:white;
+}
+
+.back-btn{
+    width:100px;
+    height:42px;
+
+    border:1px solid black;
+
+    background:white;
+    color:black;
+
+    cursor:pointer;
+}
+
+.dashboard-title{
+    flex:1;
+
+    text-align:center;
+
+    font-size:28px;
+    font-weight:600;
+}
+
+/* ---------- main section ---------- */
+
+.dashboard-main{
+    flex:1;
+
+    display:flex;
+}
+
+/* ======================
+   Workspace Panel
+====================== */
+
+.dashboard-page .workspace-panel{
+    width:65%;
+
+    display:flex;
+    flex-direction:column;
+
+    border-right:2px solid black;
+}
+
+/* top selector area */
+
+.workspace-toolbar{
+    padding:20px;
+}
+
+.workspace-toolbar select{
+    width:220px;
+    height:45px;
+
+    font-size:18px;
+
+    border:1px solid black;
+
+    padding-left:10px;
+
+    background:white;
+}
+
+/* large workspace */
+
+.workspace-content{
+    flex:1;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    font-size:32px;
+}
+
+/* ======================
+   Chat Panel
+====================== */
+
+.dashboard-page .chat-panel{
+    width:35%;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    font-size:32px;
+}

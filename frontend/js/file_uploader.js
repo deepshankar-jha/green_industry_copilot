@@ -126,14 +126,27 @@ class FileUploader {
   }
 
   /**
-   * Controls submit button visibility.
+   * Controls choose button and submit button visibility.
    *
    * Rules:
-   * - Show the button when a file is selected.
-   * - Hide the button when no file is selected.
+   * - When a file exists:
+   *     hide "Choose File"
+   *     show "Submit File"
+   *
+   * - When no file exists:
+   *     show "Choose File"
+   *     hide "Submit File"
    */
   updateSubmitButton() {
-    this.submitButton.style.display = this.file ? "inline-block" : "none";
+    if (this.file) {
+      this.submitButton.style.display = "inline-block";
+
+      this.chooseButton.style.display = "none";
+    } else {
+      this.submitButton.style.display = "none";
+
+      this.chooseButton.style.display = "inline-block";
+    }
   }
 
   /**

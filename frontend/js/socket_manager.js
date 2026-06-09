@@ -17,6 +17,14 @@ class SocketManager {
     this.socket.on("disconnect", () => {
       console.log("Disconnected");
     });
+
+    this.socket.on("reconnect", () => {
+      console.log("Reconnected with new id:", this.socket.id);
+
+      this.socket.on("connect_error", (err) => {
+        console.error("Connect error:", err);
+      });
+    });
   }
 
   on(eventName, callback) {
@@ -25,5 +33,9 @@ class SocketManager {
 
   emit(eventName, data) {
     this.socket.emit(eventName, data);
+  }
+
+  getSocketId() {
+    return this.socket.id;
   }
 }
