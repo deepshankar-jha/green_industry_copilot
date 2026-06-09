@@ -45,7 +45,7 @@
         Explains the purpose and capabilities of the application.
         -->
         <p class="subtitle">
-            Upload process documents, spreadsheets, reports, and engineering files.
+            Upload process documents pdf,word etc.
             Let AI analyze emissions, energy consumption, water usage, and byproducts
             across your industrial processes.
         </p>
@@ -68,11 +68,11 @@
                 </div>
 
                 <!-- Upload Section Heading -->
-                <h2>Upload Multiple Files</h2>
+                <h2>Upload Single File</h2>
 
                 <!-- Instructions for users -->
                 <p>
-                    Drag & drop files here or click the button below
+                    click the button below
                 </p>
 
                 <!--
@@ -82,16 +82,16 @@
                 Event handling is implemented in file_uploader.js.
                 -->
                 <button id="chooseBtn">
-                    Choose Files
+                    Choose File
                 </button>
 
                 <!--
                 Hidden File Input
 
-                Allows selection of multiple files.
+                Allows selection of single file.
                 Controlled programmatically by chooseBtn.
                 -->
-                <input type="file" id="files" multiple>
+                <input type="file" id="files">
 
                 <!--
                 Selected File List
@@ -108,7 +108,7 @@
                 Initiates upload process to the backend server.
                 -->
                 <button id="submitBtn" class="submit-btn">
-                    Submit Files
+                    Submit File
                 </button>
 
             </div>

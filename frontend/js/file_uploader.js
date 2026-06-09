@@ -2,27 +2,28 @@
  * ============================================================================
  * FileUploader
  * ============================================================================
- * Handles file upload interactions for the landing page.
+ * Handles single-file upload interactions for the landing page.
  *
- * Features:
- * - Opens the file picker when the custom button is clicked.
- * - Supports uploading multiple files.
- * - Displays uploaded file names and sizes.
- * - Allows removing individual files.
- * - Shows the submit button only when at least one file exists.
- * - Provides methods for retrieving and clearing uploaded files.
+ * Responsibilities:
+ * - Opens the native file picker when the custom button is clicked.
+ * - Allows the user to select a single file.
+ * - Replaces any previously selected file with the new one.
+ * - Displays the selected file name and size.
+ * - Allows removing the selected file.
+ * - Shows or hides the submit button depending on whether a file exists.
+ * - Provides methods for retrieving and clearing the selected file.
  * ============================================================================
  */
 
 class FileUploader {
   /**
-   * Creates a FileUploader instance.
+   * Creates a FileUploader instance and caches required DOM elements.
    *
-   * @param {Object} config - Configuration object.
-   * @param {string} config.fileInput - Selector for the hidden file input.
-   * @param {string} config.chooseButton - Selector for the "Choose Files" button.
-   * @param {string} config.fileList - Selector for the file list container.
-   * @param {string} config.submitButton - Selector for the submit button.
+   * @param {Object} config Configuration object.
+   * @param {string} config.fileInput Selector for the hidden file input element.
+   * @param {string} config.chooseButton Selector for the custom "Choose File" button.
+   * @param {string} config.fileList Selector for the container displaying file information.
+   * @param {string} config.submitButton Selector for the upload/submit button.
    */
   constructor({ fileInput, chooseButton, fileList, submitButton }) {
     this.fileInput = document.querySelector(fileInput);
@@ -34,19 +35,19 @@ class FileUploader {
      * Stores all uploaded files.
      * @type {File[]}
      */
-    this.files = [];
+    this.file = null;
 
     this.initialize();
   }
 
   /**
-   * Initializes event listeners and UI state.
+   * Initializes event listeners and sets the initial UI state.
    *
    * Responsibilities:
-   * - Opens the file dialog when the custom button is clicked.
-   * - Handles file selection events.
-   * - Resets the input value so the same file can be selected again.
-   * - Sets the initial submit button visibility.
+   * - Opens the file picker when the custom button is clicked.
+   * - Processes file selection events.
+   * - Clears the input value to allow re-selecting the same file.
+   * - Updates submit button visibility.
    */
   initialize() {
     // Open native file picker when custom button is clicked.
@@ -67,85 +68,88 @@ class FileUploader {
   }
 
   /**
-   * Adds files to the internal file array.
+   * Stores the selected file.
    *
-   * @param {FileList} fileList - Files selected by the user.
+   * Only the first file is used. If a file already exists,
+   * it is replaced by the newly selected file.
+   *
+   * @param {FileList} fileList Files returned by the input element.
    */
   addFiles(fileList) {
-    this.files.push(...Array.from(fileList));
+    this.file = fileList.length > 0 ? fileList[0] : null;
     this.render();
   }
 
   /**
-   * Removes a file from the list.
+   * Removes the currently selected file.
    *
-   * @param {number} index - Index of the file to remove.
+   * This is equivalent to calling clear().
    */
-  removeFile(index) {
-    this.files.splice(index, 1);
-    this.render();
+  removeFile() {
+    this.clear();
   }
 
   /**
-   * Renders the current list of uploaded files.
+   * Renders the file information in the UI.
    *
-   * For each file:
-   * - Creates a file item element.
-   * - Displays file name and size.
-   * - Attaches a remove button handler.
-   * - Appends the item to the file list container.
+   * Responsibilities:
+   * - Clears any previous UI content.
+   * - Displays the selected file name and size.
+   * - Creates a remove button for clearing the file.
+   * - Updates submit button visibility.
    */
   render() {
     this.fileList.innerHTML = "";
 
-    this.files.forEach((file, index) => {
+    if (this.file) {
+      const file = this.file;
+
       const div = document.createElement("div");
       div.className = "file-item";
 
       div.innerHTML = `
-    <div class="file-info">
-        <span class="file-name">${file.name}</span>
-        <span class="file-size">${(file.size / 1024).toFixed(1)} KB</span>
-    </div>
-    <button class="remove-btn">✕</button>
-`;
+        <div class="file-info">
+            <span class="file-name">${file.name}</span>
+            <span class="file-size">${(file.size / 1024).toFixed(1)} KB</span>
+        </div>
+        <button class="remove-btn">✕</button>
+    `;
 
       div.querySelector(".remove-btn").addEventListener("click", () => {
-        this.removeFile(index);
+        this.clear();
       });
 
       this.fileList.appendChild(div);
-    });
+    }
 
     this.updateSubmitButton();
   }
 
   /**
-   * Controls visibility of the submit button.
+   * Controls submit button visibility.
    *
    * Rules:
-   * - Visible when one or more files are present.
-   * - Hidden when no files exist.
+   * - Show the button when a file is selected.
+   * - Hide the button when no file is selected.
    */
   updateSubmitButton() {
-    this.submitButton.style.display =
-      this.files.length > 0 ? "inline-block" : "none";
+    this.submitButton.style.display = this.file ? "inline-block" : "none";
   }
 
   /**
-   * Returns all currently uploaded files.
+   * Returns the currently selected file.
    *
-   * @returns {File[]} Array of uploaded files.
+   * @returns {File|null} Selected file or null if no file exists.
    */
-  getFiles() {
-    return this.files;
+  getFile() {
+    return this.file;
   }
 
   /**
-   * Removes all files and refreshes the UI.
+   * Clears the selected file and refreshes the UI.
    */
   clear() {
-    this.files = [];
+    this.file = null;
     this.render();
   }
 }

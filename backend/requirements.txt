@@ -4,3 +4,7 @@ python-socketio
 python-multipart
 jinja2
 aiofiles
+openai
+python-docx
+pypdf
+pydantic
