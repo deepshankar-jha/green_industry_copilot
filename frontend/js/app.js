@@ -37,6 +37,9 @@ class Application {
     this.registerEvents();
 
     this.registerBackButton();
+
+    // create chat
+    this.chat = new ChatUI("chatApp");
   }
 
   /**
