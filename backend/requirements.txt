@@ -8,3 +8,8 @@ openai
 python-docx
 pypdf
 pydantic
+numpy
+seaborn
+matplotlib
+scipy
+plotly

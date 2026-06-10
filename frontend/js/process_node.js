@@ -151,66 +151,99 @@ class ProcessNode {
   render(ctx) {
     this.updateSize();
 
-    ctx.fillStyle = "#2f2f2f";
-    ctx.strokeStyle = "#888";
+    this.width = Math.max(this.width, this.measureTitleWidth(ctx));
+
+    //
+    // Node colors
+    //
+    const bodyColor = "#EEF4EE";
+    const borderColor = "#B8D7B6";
+    const headerColor = "#2FA53F";
+    const titleColor = "#ffffff";
+    const textColor = "#1C4033";
+    const mutedColor = "#5F7668";
+
+    const radius = 12;
+
+    //
+    // Main body
+    //
+    ctx.fillStyle = bodyColor;
+    ctx.strokeStyle = borderColor;
     ctx.lineWidth = 2;
 
-    this.width = Math.max(this.width, this.measureTitleWidth(ctx));
-    
-    ctx.fillRect(this.x, this.y, this.width, this.height);
-    ctx.strokeRect(this.x, this.y, this.width, this.height);
+    ctx.beginPath();
+    ctx.roundRect(this.x, this.y, this.width, this.height, radius);
+    ctx.fill();
+    ctx.stroke();
+
+    //
+    // Header strip
+    //
+    ctx.fillStyle = headerColor;
+    ctx.beginPath();
+    ctx.roundRect(this.x, this.y, this.width, 40, radius);
+    ctx.fill();
 
     //
     // Toggle button
     //
-    ctx.fillStyle = "#555";
-    ctx.fillRect(this.x + 5, this.y + 5, 16, 16);
+    ctx.fillStyle = "#274d86";
+    ctx.beginPath();
+    this.roundRect(ctx, this.x + 8, this.y + 10, 18, 18, 5);
+    ctx.fill();
 
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "12px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
-    ctx.fillText(this.showDetails ? "-" : "+", this.x + 13, this.y + 13);
+    ctx.fillText(this.showDetails ? "-" : "+", this.x + 17, this.y + 19);
 
     //
     // Title
     //
+    ctx.fillStyle = titleColor;
     ctx.font = "bold 16px Arial";
-    ctx.fillText(this.title, this.x + this.width / 2, this.y + 25);
+    ctx.fillText(this.title, this.x + this.width / 2, this.y + 22);
 
     if (!this.showDetails) return;
 
+    //
+    // Body text
+    //
+    ctx.fillStyle = textColor;
     ctx.font = "12px Arial";
     ctx.textAlign = "left";
 
-    let y = this.y + 50;
+    let y = this.y + 55;
 
-    // description
     y = this.drawWrappedText(
       ctx,
       "Description: " + this.description,
-      this.x + 10,
+      this.x + 12,
       y,
-      this.width - 20,
+      this.width - 24,
       18,
     );
+
+    ctx.fillStyle = mutedColor;
 
     for (const [key, value] of Object.entries(this.metaData)) {
       y = this.drawWrappedText(
         ctx,
         `${key}: ${value}`,
-        this.x + 10,
+        this.x + 12,
         y,
-        this.width - 20,
+        this.width - 24,
         18,
       );
     }
   }
 
   renderConnections(ctx) {
-    ctx.strokeStyle = "#00c8ff";
-    ctx.fillStyle = "#00c8ff";
+    ctx.strokeStyle = "#40c4ff";
+    ctx.fillStyle = "#40c4ff";
     ctx.lineWidth = 3;
 
     for (const target of this.connections) {
@@ -327,5 +360,19 @@ class ProcessNode {
     ctx.restore();
 
     return width + 50; // left/right padding
+  }
+
+  roundRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
   }
 }

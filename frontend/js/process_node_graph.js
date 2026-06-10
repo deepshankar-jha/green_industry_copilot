@@ -45,6 +45,11 @@ class ProcessNodeGraph {
     this.canvas = document.getElementById(canvasId);
     this.ctx = this.canvas.getContext("2d");
 
+    this.backgroundColor = "#E9F0E7";
+    this.dotColor = "rgba(54,95,67,0.10)";
+    this.dotSpacing = 45;
+    this.dotRadius = 1.4;
+
     this.nodes = [];
 
     this.nextNodeId = 1;
@@ -371,37 +376,31 @@ class ProcessNodeGraph {
    * - Current pan offset.
    */
   drawGrid() {
-    const size = 50;
-
     const width = this.canvas.width;
     const height = this.canvas.height;
-
-    this.ctx.strokeStyle = "#333";
-    this.ctx.lineWidth = 1;
 
     const startX = -this.offsetX / this.scale;
     const startY = -this.offsetY / this.scale;
 
-    for (
-      let x = Math.floor(startX / size) * size;
-      x < startX + width / this.scale;
-      x += size
-    ) {
-      this.ctx.beginPath();
-      this.ctx.moveTo(x, startY);
-      this.ctx.lineTo(x, startY + height / this.scale);
-      this.ctx.stroke();
-    }
+    this.ctx.fillStyle = this.backgroundColor;
+    this.ctx.fillRect(startX, startY, width / this.scale, height / this.scale);
+
+    this.ctx.fillStyle = this.dotColor;
 
     for (
-      let y = Math.floor(startY / size) * size;
-      y < startY + height / this.scale;
-      y += size
+      let x = Math.floor(startX / this.dotSpacing) * this.dotSpacing;
+      x < startX + width / this.scale;
+      x += this.dotSpacing
     ) {
-      this.ctx.beginPath();
-      this.ctx.moveTo(startX, y);
-      this.ctx.lineTo(startX + width / this.scale, y);
-      this.ctx.stroke();
+      for (
+        let y = Math.floor(startY / this.dotSpacing) * this.dotSpacing;
+        y < startY + height / this.scale;
+        y += this.dotSpacing
+      ) {
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, this.dotRadius, 0, Math.PI * 2);
+        this.ctx.fill();
+      }
     }
   }
 
