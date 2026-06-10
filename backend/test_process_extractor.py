@@ -1,30 +1,31 @@
 """
 Simple test runner for ProcessExtractor.
 
-Loads a document, extracts the process flow, and prints the
-structured JSON output.
+Loads a document, extracts the process flow,
+and saves the output to a JSON file.
 """
 
+from pathlib import Path
 from dotenv import load_dotenv
 from process_extractor import ProcessExtractor
 import json
 
-# Load environment variables (.env)
 load_dotenv()
 
 
 def main():
-    """
-    Run the process extractor on a sample document.
-    """
-
     extractor = ProcessExtractor(model="gpt-4.1-mini")
 
     input_file = "./test_data/Shakti AgroChem Industries Processes.pdf"
 
     processes = extractor.extract_processes(input_file)
 
-    print(json.dumps(processes, indent=4, ensure_ascii=False))
+    output_file = Path("sample_process_output.json")
+
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(processes, f, indent=4, ensure_ascii=False)
+
+    print(f"Saved output to {output_file}")
 
 
 if __name__ == "__main__":

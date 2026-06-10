@@ -111,9 +111,11 @@ class ChatUI {
     this.inputField.value = "";
 
     // Demo bot response
-    setTimeout(() => {
-      this.receiveMessage(`You said: ${text}`);
-    }, 500);
+    if (window.app && window.app.socketManager) {
+      window.app.socketManager.emit("chat_message", {
+        message: text,
+      });
+    }
   }
 
   /**

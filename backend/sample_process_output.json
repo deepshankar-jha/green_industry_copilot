@@ -1,0 +1,758 @@
+[
+    {
+        "id": 1,
+        "process_name": "Natural Gas Treatment and Desulfurization",
+        "description": "Natural gas received from pipelines contains sulfur compounds which poison catalysts used in downstream reformers. The gas is cleaned using hydrodesulfurization and zinc oxide adsorption.",
+        "inputs": [
+            {
+                "name": "Natural gas",
+                "quantity": 1020.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Hydrogen recycle gas",
+                "quantity": 12.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Zinc oxide adsorbent",
+                "quantity": 1.5,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "Desulfurized natural gas",
+                "quantity": 1005.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "byproducts": [
+            {
+                "name": "Spent zinc oxide containing sulfur compounds",
+                "quantity": 1.2,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "energy_consumption": [
+            {
+                "name": "Energy",
+                "quantity": 6.0,
+                "measuring_unit": "MWh/day",
+                "energy_source": "Natural gas-fired heaters"
+            }
+        ],
+        "water_consumption": [
+            {
+                "quantity": 40.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Intake"
+            },
+            {
+                "quantity": 10.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Discharge"
+            }
+        ],
+        "emissions": [
+            {
+                "name": "CO₂",
+                "quantity": 20.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Methane",
+                "quantity": 0.8,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "NOx",
+                "quantity": 0.12,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "SOx",
+                "quantity": 0.02,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Particulate",
+                "quantity": 0.01,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "operating_cost": "₹7,50,000/day",
+        "next_processes": [
+            "Steam Reforming"
+        ]
+    },
+    {
+        "id": 2,
+        "process_name": "Steam Reforming",
+        "description": "Methane reacts with steam in catalyst-filled reformers to generate hydrogen-rich synthesis gas.",
+        "inputs": [
+            {
+                "name": "Desulfurized natural gas",
+                "quantity": 1005.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Steam",
+                "quantity": 2100.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "Synthesis gas",
+                "quantity": 2780.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "byproducts": [
+            {
+                "name": "Waste heat",
+                "quantity": 350.0,
+                "measuring_unit": "MWh/day"
+            }
+        ],
+        "energy_consumption": [
+            {
+                "name": "Energy",
+                "quantity": 420.0,
+                "measuring_unit": "MWh/day",
+                "energy_source": "Natural gas combustion"
+            }
+        ],
+        "water_consumption": [
+            {
+                "quantity": 2300.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Intake"
+            },
+            {
+                "quantity": 150.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Discharge"
+            }
+        ],
+        "emissions": [
+            {
+                "name": "CO₂",
+                "quantity": 1650.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Methane",
+                "quantity": 1.5,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "NOx",
+                "quantity": 0.6,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "SOx",
+                "quantity": 0.04,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Particulate",
+                "quantity": 0.05,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "operating_cost": "₹48,00,000/day",
+        "next_processes": [
+            "Water Gas Shift Reaction"
+        ]
+    },
+    {
+        "id": 3,
+        "process_name": "Water Gas Shift Reaction",
+        "description": "Carbon monoxide is converted into carbon dioxide while producing additional hydrogen.",
+        "inputs": [
+            {
+                "name": "Synthesis gas",
+                "quantity": 2780.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Steam",
+                "quantity": 900.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "Hydrogen-rich gas",
+                "quantity": 2650.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "byproducts": [
+            {
+                "name": "Condensate water",
+                "quantity": 250.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "energy_consumption": [
+            {
+                "name": "Energy",
+                "quantity": 55.0,
+                "measuring_unit": "MWh/day",
+                "energy_source": "Recovered steam energy"
+            }
+        ],
+        "water_consumption": [
+            {
+                "quantity": 500.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Intake"
+            },
+            {
+                "quantity": 100.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Discharge"
+            }
+        ],
+        "emissions": [
+            {
+                "name": "CO₂",
+                "quantity": 85.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Methane",
+                "quantity": 0.2,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "NOx",
+                "quantity": 0.08,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "SOx",
+                "quantity": 0.01,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Particulate",
+                "quantity": 0.01,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "operating_cost": "₹15,00,000/day",
+        "next_processes": [
+            "CO₂ Removal",
+            "Hydrogen Purification"
+        ]
+    },
+    {
+        "id": 4,
+        "process_name": "CO₂ Removal and Capture",
+        "description": "Carbon dioxide is separated using amine absorption. Captured CO₂ is reused for urea production.",
+        "inputs": [
+            {
+                "name": "Hydrogen-rich gas",
+                "quantity": 2650.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Monoethanolamine solution",
+                "quantity": 40.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "Purified hydrogen mixture",
+                "quantity": 1900.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Captured CO₂",
+                "quantity": 730.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "byproducts": [
+            {
+                "name": "Spent solvent residues",
+                "quantity": 0.8,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "energy_consumption": [
+            {
+                "name": "Energy",
+                "quantity": 90.0,
+                "measuring_unit": "MWh/day",
+                "energy_source": "Steam and electricity"
+            }
+        ],
+        "water_consumption": [
+            {
+                "quantity": 300.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Intake"
+            },
+            {
+                "quantity": 60.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Discharge"
+            }
+        ],
+        "emissions": [
+            {
+                "name": "CO₂",
+                "quantity": 12.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Methane",
+                "quantity": 0.1,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "NOx",
+                "quantity": 0.03,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "SOx",
+                "quantity": 0.01,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Particulate",
+                "quantity": 0.005,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "operating_cost": "₹18,00,000/day",
+        "next_processes": [
+            "Ammonia Synthesis",
+            "Urea Production"
+        ]
+    },
+    {
+        "id": 5,
+        "process_name": "Ammonia Synthesis (Haber-Bosch Process)",
+        "description": "Hydrogen reacts with nitrogen under high pressure to produce ammonia.",
+        "inputs": [
+            {
+                "name": "Purified hydrogen mixture",
+                "quantity": 1900.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Nitrogen from air separation",
+                "quantity": 620.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "Liquid ammonia",
+                "quantity": 820.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "byproducts": [
+            {
+                "name": "Purge gas",
+                "quantity": 20.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "energy_consumption": [
+            {
+                "name": "Energy",
+                "quantity": 220.0,
+                "measuring_unit": "MWh/day",
+                "energy_source": "Electricity and steam turbines"
+            }
+        ],
+        "water_consumption": [
+            {
+                "quantity": 700.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Intake"
+            },
+            {
+                "quantity": 80.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Discharge"
+            }
+        ],
+        "emissions": [
+            {
+                "name": "CO₂",
+                "quantity": 30.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Methane",
+                "quantity": 0.2,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "NOx",
+                "quantity": 0.04,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "SOx",
+                "quantity": 0.01,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Particulate",
+                "quantity": 0.005,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "operating_cost": "₹32,00,000/day",
+        "next_processes": [
+            "Urea Production",
+            "Nitric Acid Production"
+        ]
+    },
+    {
+        "id": 6,
+        "process_name": "Nitric Acid Production",
+        "description": "Ammonia is oxidized over platinum-rhodium catalysts to produce nitric acid.",
+        "inputs": [
+            {
+                "name": "Liquid ammonia",
+                "quantity": 300.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Air",
+                "quantity": 2200.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "Nitric acid (60%)",
+                "quantity": 540.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "byproducts": [
+            {
+                "name": "Nitrous oxide traces",
+                "quantity": 0.7,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "energy_consumption": [
+            {
+                "name": "Energy",
+                "quantity": 95.0,
+                "measuring_unit": "MWh/day",
+                "energy_source": "Electricity and steam recovery"
+            }
+        ],
+        "water_consumption": [
+            {
+                "quantity": 900.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Intake"
+            },
+            {
+                "quantity": 110.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Discharge"
+            }
+        ],
+        "emissions": [
+            {
+                "name": "CO₂",
+                "quantity": 25.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Methane",
+                "quantity": 0.05,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "NOx",
+                "quantity": 2.3,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "SOx",
+                "quantity": 0.01,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Particulate",
+                "quantity": 0.02,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "operating_cost": "₹22,00,000/day",
+        "next_processes": [
+            "Ammonium Nitrate Production"
+        ]
+    },
+    {
+        "id": 7,
+        "process_name": "Urea Production",
+        "description": "Ammonia reacts with captured carbon dioxide to form urea solution which is concentrated and granulated.",
+        "inputs": [
+            {
+                "name": "Liquid ammonia",
+                "quantity": 520.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Captured CO₂",
+                "quantity": 730.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "Urea fertilizer granules",
+                "quantity": 1100.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "byproducts": [
+            {
+                "name": "Process condensate",
+                "quantity": 120.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "energy_consumption": [
+            {
+                "name": "Energy",
+                "quantity": 180.0,
+                "measuring_unit": "MWh/day",
+                "energy_source": "Steam and electricity"
+            }
+        ],
+        "water_consumption": [
+            {
+                "quantity": 1100.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Intake"
+            },
+            {
+                "quantity": 90.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Discharge"
+            }
+        ],
+        "emissions": [
+            {
+                "name": "CO₂",
+                "quantity": 8.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Methane",
+                "quantity": 0.05,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "NOx",
+                "quantity": 0.02,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "SOx",
+                "quantity": 0.01,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Particulate",
+                "quantity": 0.04,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "operating_cost": "₹40,00,000/day",
+        "next_processes": [
+            "Packaging and Storage"
+        ]
+    },
+    {
+        "id": 8,
+        "process_name": "Ammonium Nitrate Production",
+        "description": "Nitric acid reacts with ammonia to produce ammonium nitrate solution which is concentrated and prilled.",
+        "inputs": [
+            {
+                "name": "Nitric acid",
+                "quantity": 540.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Liquid ammonia",
+                "quantity": 180.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "Ammonium nitrate fertilizer",
+                "quantity": 680.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "byproducts": [
+            {
+                "name": "Steam condensate",
+                "quantity": 40.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "energy_consumption": [
+            {
+                "name": "Energy",
+                "quantity": 130.0,
+                "measuring_unit": "MWh/day",
+                "energy_source": "Electricity and steam"
+            }
+        ],
+        "water_consumption": [
+            {
+                "quantity": 600.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Intake"
+            },
+            {
+                "quantity": 50.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Discharge"
+            }
+        ],
+        "emissions": [
+            {
+                "name": "CO₂",
+                "quantity": 10.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Methane",
+                "quantity": 0.02,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "NOx",
+                "quantity": 0.4,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "SOx",
+                "quantity": 0.01,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Particulate",
+                "quantity": 0.03,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "operating_cost": "₹25,00,000/day",
+        "next_processes": [
+            "Packaging and Storage"
+        ]
+    },
+    {
+        "id": 9,
+        "process_name": "Packaging and Storage",
+        "description": "Finished fertilizers are dried, packed, palletized and stored for shipment.",
+        "inputs": [
+            {
+                "name": "Urea fertilizer",
+                "quantity": 1100.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Ammonium nitrate fertilizer",
+                "quantity": 680.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Packaging material",
+                "quantity": 25.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "Finished packaged products",
+                "quantity": 1780.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "byproducts": [
+            {
+                "name": "Damaged bags and waste plastic",
+                "quantity": 1.0,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "energy_consumption": [
+            {
+                "name": "Energy",
+                "quantity": 60.0,
+                "measuring_unit": "MWh/day",
+                "energy_source": "Grid electricity"
+            }
+        ],
+        "water_consumption": [
+            {
+                "quantity": 50.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Intake"
+            },
+            {
+                "quantity": 5.0,
+                "measuring_unit": "m³/day",
+                "water_source": "Discharge"
+            }
+        ],
+        "emissions": [
+            {
+                "name": "CO₂",
+                "quantity": 3.0,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Methane",
+                "quantity": 0.01,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "NOx",
+                "quantity": 0.01,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "SOx",
+                "quantity": 0.005,
+                "measuring_unit": "tons/day"
+            },
+            {
+                "name": "Particulate",
+                "quantity": 0.2,
+                "measuring_unit": "tons/day"
+            }
+        ],
+        "operating_cost": "₹8,00,000/day",
+        "next_processes": [
+            "Distribution"
+        ]
+    }
+]

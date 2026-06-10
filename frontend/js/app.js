@@ -38,6 +38,8 @@ class Application {
 
     this.registerBackButton();
 
+    this.registerWorkspaceSwitcher();
+
     // create chat
     this.chat = new ChatUI("chatApp");
   }
@@ -129,7 +131,7 @@ class Application {
     formData.append("file", file);
     formData.append("socket_id", this.socketManager.getSocketId());
 
-    fetch("/upload", {
+    fetch("/mock-upload", {
       method: "POST",
       body: formData,
     }).catch((err) => {
@@ -171,7 +173,7 @@ class Application {
   onChatResponse(data) {
     console.log("AI response:", data);
 
-    // update chat window
+    this.chat.receiveMessage(data.message);
   }
 
   onProcessExtracted(data) {
@@ -207,5 +209,33 @@ class Application {
 
       document.getElementById("landingPage").classList.remove("hidden");
     });
+  }
+
+  registerWorkspaceSwitcher() {
+    this.workspaceSelect = document.getElementById("workspaceSelect");
+
+    this.workspaceSelect.addEventListener("change", () =>
+      this.switchWorkspacePanel(),
+    );
+  }
+
+  switchWorkspacePanel() {
+    document
+      .querySelectorAll(".workspace-view")
+      .forEach((panel) => panel.classList.add("hidden"));
+
+    switch (this.workspaceSelect.value) {
+      case "original":
+        document.getElementById("originalPanel").classList.remove("hidden");
+        break;
+
+      case "optimized":
+        document.getElementById("optimizedPanel").classList.remove("hidden");
+        break;
+
+      case "insights":
+        document.getElementById("insightsPanel").classList.remove("hidden");
+        break;
+    }
   }
 }

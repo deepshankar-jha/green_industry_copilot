@@ -6,6 +6,8 @@ from fastapi.responses import FileResponse
 from fastapi import Form
 import asyncio
 
+import json
+from pathlib import Path
 from process_extractor import ProcessExtractor
 from socket_server import sio
 
@@ -24,32 +26,15 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 # ----------------------------------------------------
 # File upload endpoint
 # ----------------------------------------------------
-@app.post("/upload")
-async def upload_file(file: UploadFile = File(...), socket_id: str = Form(...)):
-    contents = await file.read()
-
-    # ----------------------------------------------------
-    # Create a dedicated folder for this client
-    # uploads/<socket_id>/
-    # ----------------------------------------------------
-    client_upload_dir = UPLOAD_DIR / socket_id
-    client_upload_dir.mkdir(parents=True, exist_ok=True)
-
-    # Full path to uploaded file
-    filepath = client_upload_dir / file.filename
-
-    # Save file
-    with open(filepath, "wb") as f:
-        f.write(contents)
-
-    # notify file uploaded
+@app.post("/mock-upload")
+async def mock_upload(file: UploadFile = File(...), socket_id: str = Form(...)):
+    # notify upload
     await sio.emit(
         "process_status",
         {"status": "file_uploaded", "message": f"{file.filename} uploaded"},
         to=socket_id,
     )
 
-    # extraction started
     await sio.emit(
         "process_status",
         {
@@ -59,10 +44,11 @@ async def upload_file(file: UploadFile = File(...), socket_id: str = Form(...)):
         to=socket_id,
     )
 
-    # run extraction
-    processes = await asyncio.to_thread(extractor.extract_processes, str(filepath))
+    json_path = Path("sample_process_output.json")
 
-    # extraction complete
+    with open(json_path, "r", encoding="utf-8") as f:
+        processes = json.load(f)
+
     await sio.emit(
         "process_status",
         {
@@ -72,14 +58,41 @@ async def upload_file(file: UploadFile = File(...), socket_id: str = Form(...)):
         to=socket_id,
     )
 
-    # send to every connected client
     await sio.emit(
         "process_extracted",
-        {"file": file.filename, "processes": processes},
+        {
+            "file": file.filename,
+            "processes": processes,
+        },
         to=socket_id,
     )
 
-    return {"status": "success", "file": file.filename}
+    return {
+        "status": "success",
+        "file": file.filename,
+        "processes": processes,
+    }
+
+
+@sio.event
+async def chat_message(sid, data):
+    """
+    Mock chat endpoint.
+    Receives:
+    {
+        "message": "..."
+    }
+    """
+
+    message = data.get("message", "")
+
+    await asyncio.sleep(0.5)
+
+    await sio.emit(
+        "chat_response",
+        {"message": f"Mock response for: {message}"},
+        to=sid,
+    )
 
 
 # ----------------------------------------------------

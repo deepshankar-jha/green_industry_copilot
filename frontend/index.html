@@ -133,13 +133,13 @@
         <!-- Top Bar -->
         <div class="dashboard-navbar">
 
-            <button id="backBtn" class="back-btn">
-                Back
-            </button>
-
             <div class="dashboard-title">
                 Green Industry Copilot
             </div>
+
+            <button id="backBtn" class="back-btn">
+                Back
+            </button>
 
         </div>
 
@@ -153,20 +153,27 @@
                 <div class="workspace-toolbar">
 
                     <select id="workspaceSelect">
-                        <option>Workspace 1</option>
-                        <option>Workspace 2</option>
-                        <option>Workspace 3</option>
+                        <option value="original">Original Graph</option>
+                        <option value="optimized">Optimized Graph</option>
+                        <option value="insights">Insights</option>
                     </select>
 
                 </div>
 
                 <!-- Workspace content -->
                 <div class="workspace-content">
+                    <div id="originalPanel" class="workspace-view">
+                        Original Graph Panel
+                    </div>
 
-                    Workspace Panel
+                    <div id="optimizedPanel" class="workspace-view hidden">
+                        Optimized Graph Panel
+                    </div>
 
+                    <div id="insightsPanel" class="workspace-view hidden">
+                        Insights Panel
+                    </div>
                 </div>
-
             </div>
 
             <!-- Chat -->

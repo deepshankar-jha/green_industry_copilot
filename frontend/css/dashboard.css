@@ -82,11 +82,18 @@
   border-right: 1px solid #dce8dc;
 
   background: #ffffff;
+
+  position: relative;
 }
 /* top selector area */
 
 .workspace-toolbar {
-  padding: 20px;
+  position: absolute;
+
+  top: 20px;
+  left: 20px;
+
+  z-index: 100;
 }
 
 .workspace-toolbar select {
@@ -122,13 +129,31 @@
 
 .workspace-content {
   flex: 1;
+  position: relative;
+}
+
+.workspace-view {
+  position: absolute;
+  inset: 0;
 
   display: flex;
-
   justify-content: center;
   align-items: center;
 
-  font-size: 32px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+#originalPanel {
+  background: #dbeafe; /* blue */
+}
+
+#optimizedPanel {
+  background: #dcfce7; /* green */
+}
+
+#insightsPanel {
+  background: #fef3c7; /* yellow */
 }
 
 /* ======================
