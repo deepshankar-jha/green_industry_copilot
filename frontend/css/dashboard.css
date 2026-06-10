@@ -2,112 +2,147 @@
    Dashboard
 ========================= */
 
-.dashboard-page{
-    height:100vh;
-    display:flex;
-    flex-direction:column;
+.dashboard-page {
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #f4f8f3;
 }
 
 /* ---------- top bar ---------- */
 
-.dashboard-page .dashboard-navbar{
-    height:70px;
+.dashboard-page .dashboard-navbar {
+  height: 70px;
 
-    display:flex;
-    align-items:center;
+  display: flex;
+  align-items: center;
 
-    border-bottom:2px solid black;
+  border-bottom: 2px solid #dce8dc;
 
-    padding:0 20px;
+  padding: 0 20px;
 
-    background:white;
+  background: #ffffff;
 }
 
-.back-btn{
-    width:100px;
-    height:42px;
+.back-btn {
+  margin-left: auto; /* pushes button to far right */
 
-    border:1px solid black;
+  width: 110px;
+  height: 44px;
 
-    background:white;
-    color:black;
+  border: none;
+  border-radius: 12px;
 
-    cursor:pointer;
+  background: #4f8b63;
+  color: white;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
 }
 
-.dashboard-title{
-    flex:1;
+.back-btn:hover {
+  background: #3f7350;
+}
 
-    text-align:center;
+.dashboard-title {
+  flex: 1;
 
-    font-size:28px;
-    font-weight:600;
+  text-align: center;
+
+  font-size: 28px;
+  font-weight: 600;
+
+  color: #1f3a2e;
 }
 
 /* ---------- main section ---------- */
 
-.dashboard-main{
-    flex:1;
+.dashboard-main {
+  flex: 1;
 
-    display:flex;
+  display: flex;
 }
 
 /* ======================
    Workspace Panel
 ====================== */
 
-.dashboard-page .workspace-panel{
-    width:65%;
+.dashboard-page .workspace-panel {
+  width: 65%;
 
-    display:flex;
-    flex-direction:column;
+  display: flex;
+  flex-direction: column;
 
-    border-right:2px solid black;
+  border-right: 1px solid #dce8dc;
+
+  background: #ffffff;
 }
-
 /* top selector area */
 
-.workspace-toolbar{
-    padding:20px;
+.workspace-toolbar {
+  padding: 20px;
 }
 
-.workspace-toolbar select{
-    width:220px;
-    height:45px;
+.workspace-toolbar select {
+  width: 230px;
+  height: 48px;
 
-    font-size:18px;
+  padding: 0 16px;
 
-    border:1px solid black;
+  font-size: 16px;
 
-    padding-left:10px;
+  border: 1px solid #cfe0cf;
+  border-radius: 12px;
 
-    background:white;
+  background: #ffffff;
+  color: #1f3a2e;
+
+  outline: none;
+
+  transition: 0.2s ease;
+}
+
+.workspace-toolbar select:hover {
+  border-color: #4f8b63;
+}
+
+.workspace-toolbar select:focus {
+  border-color: #4f8b63;
+
+  box-shadow: 0 0 0 3px rgba(79, 139, 99, 0.15);
 }
 
 /* large workspace */
 
-.workspace-content{
-    flex:1;
+.workspace-content {
+  flex: 1;
 
-    display:flex;
+  display: flex;
 
-    justify-content:center;
-    align-items:center;
+  justify-content: center;
+  align-items: center;
 
-    font-size:32px;
+  font-size: 32px;
 }
 
 /* ======================
    Chat Panel
 ====================== */
 
-.dashboard-page .chat-panel{
-    width:35%;
+.dashboard-page .chat-panel {
+  width: 35%;
 
-    display:flex;
+  display: flex;
 
-    justify-content:center;
-    align-items:center;
+  justify-content: center;
+  align-items: center;
 
-    font-size:32px;
+  font-size: 32px;
+  background: #eef5ee;
 }
