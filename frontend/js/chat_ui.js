@@ -192,13 +192,3 @@ class ChatUI {
     this.messagesArea.innerHTML = "";
   }
 }
-
-/**
- * Creates and initializes the chat interface.
- *
- * The chat UI will be rendered inside the HTML element whose
- * ID is "chatApp".
- *
- * @type {ChatUI}
- */
-const chat = new ChatUI("chatApp");

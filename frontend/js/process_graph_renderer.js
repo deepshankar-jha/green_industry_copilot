@@ -30,12 +30,17 @@ class ProcessGraphRenderer {
     const childNames = new Set();
 
     for (const process of processes) {
-      for (const nextName of process.next_processes || []) {
-        childNames.add(nextName);
+      for (const childName of process.next_processes || []) {
+        childNames.add(childName);
       }
     }
 
-    const roots = processes.filter((p) => !childNames.has(p.process_name));
+    let roots = processes.filter((p) => !childNames.has(p.process_name));
+
+    // Handle cyclic graphs (no roots)
+    if (roots.length === 0 && processes.length > 0) {
+      roots = [processes[0]];
+    }
 
     let startX = 200;
 
@@ -55,16 +60,17 @@ class ProcessGraphRenderer {
     for (const childName of process.next_processes || []) {
       const childProcess = this.processMap.get(childName);
 
-      if (!childProcess) continue;
+      if (!childProcess) {
+        console.warn(
+          `Process ${process.process_name} references missing process ${childName}`,
+        );
+        continue;
+      }
 
       let childNode;
 
-      //
-      // avoid duplicate nodes
-      //
       if (this.nodeMap.has(childName)) {
         childNode = this.nodeMap.get(childName);
-
         parentNode.connectTo(childNode);
       } else {
         childNode = this.graph.addNextNode(

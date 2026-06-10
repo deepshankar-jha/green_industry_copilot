@@ -67,40 +67,51 @@ Rules
 -----
 
 - Preserve overall product output.
-- Preserve process connectivity.
+- Preserve graph connectivity.
+- Process names must be unique.
+- next_processes MUST contain process names.
+- Every name inside next_processes must exactly match an existing process_name.
+- Use identical spelling, spacing and capitalization.
+- Do not create orphan processes.
+- Do not create dangling references.
+- Maintain a valid directed graph.
 - Add new processes if beneficial.
 - Add recycle loops when appropriate.
 - Reuse byproducts wherever possible.
-- Replace fossil fuel energy sources with:
 
-    - Solar
-    - Wind
-    - Green hydrogen
-    - Biomass
-    - Waste heat recovery
+Consistency Rules:
 
-- Introduce:
+If a process_name is:
 
-    - Carbon capture
-    - Water recycling
-    - Catalyst improvements
-    - Electrification
-    - Membrane separation
-    - Heat exchangers
-    - Waste-to-energy systems
+"Heat Treatment"
 
-- Reduce emissions and costs whenever possible.
+then every reference to it inside next_processes must be:
+
+["Heat Treatment"]
+
+NOT:
+
+["heat treatment"]
+["Heat-treatment"]
+["Heat Treatment Process"]
+["Heating"]
+
+The process_name and its references inside next_processes must always match exactly.
 
 Return ONLY the optimized process graph.
 
 Original graph:
 
-{json.dumps(processes, indent=2)}
+{json.dumps(processes, separators=(",", ":"))}
 """
 
         result = structured_llm.invoke(prompt)
 
-        return [p.model_dump() for p in result.processes]
+        processes = [p.model_dump() for p in result.processes]
+
+        validate_graph(processes)
+
+        return processes
 
     def load_json(self, filepath: str):
 
@@ -121,3 +132,13 @@ Original graph:
             json.dump(optimized, f, indent=4, ensure_ascii=False)
 
         return optimized
+
+def validate_graph(processes):
+    names = {p["process_name"] for p in processes}
+
+    for process in processes:
+        for child in process["next_processes"]:
+            if child not in names:
+                raise ValueError(
+                    f"{process['process_name']} references missing process '{child}'"
+                )

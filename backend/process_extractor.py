@@ -53,6 +53,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class ProcessExtractor:
     """
     Extracts industrial process information from documents using OpenAI.
@@ -246,23 +247,88 @@ class ProcessExtractor:
         structured_llm = self.llm.with_structured_output(ProcessList)
 
         prompt = f"""
-    Extract every industrial process step from the document.
+Rules:
 
-    Rules:
-    - Preserve process ordering.
-    - Preserve process names exactly.
-    - Preserve units.
-    - next_processes should contain process names.
-    - Return an empty list if no processes exist.
+- Extract every process step.
+- Preserve process ordering.
+- Preserve process names exactly.
+- Process names must be unique.
+- next_processes MUST contain process names, never IDs.
+- Every entry inside next_processes must exactly match an existing process_name.
+- Use identical spelling, spacing and capitalization.
+- Never abbreviate or rename processes.
+- A process may have multiple downstream processes.
+- Return an empty list if no processes exist.
 
-    Document:
+Consistency Rules:
 
-    {document_text}
-    """
+If a process is named:
 
+"Grinding"
+
+then every reference to it inside next_processes must be:
+
+["Grinding"]
+
+NOT:
+
+["grinding"]
+["GRINDING"]
+["Grinding Process"]
+["Grinder"]
+
+For all units:
+
+- Use ASCII characters only.
+- Never use superscripts such as ², ³, ⁴.
+- Never use Unicode symbols or control characters.
+- Represent powers using ^.
+
+Examples:
+
+m^3/day
+m^2
+ft^3
+kg/hour
+L/min
+
+Do not output:
+
+m³/day
+m²
+ft³
+kg·h⁻¹
+
+For all monetary values:
+
+- Always use ISO 4217 currency codes (INR, USD, EUR, GBP, JPY, etc.).
+- Never use currency symbols such as ₹, $, €, £, ¥.
+- Never output Unicode escape sequences or control characters.
+- Format monetary values as:
+
+"<CURRENCY_CODE> <amount>/<time_unit>"
+
+Examples:
+"INR 250000/day"
+"USD 1800/hour"
+"EUR 35000/year"
+
+Do not use:
+"₹2,50,000/day"
+"$1800/hour"
+"\u0012,50,000/day"
+
+Document:
+
+{document_text}
+"""
         result = structured_llm.invoke(prompt)
 
-        return [p.model_dump() for p in result.processes]
+        processes = [p.model_dump() for p in result.processes]
+
+        validate_graph(processes)
+
+        return processes
 
     ###############################################################################
     # Export Utilities
@@ -293,3 +359,14 @@ class ProcessExtractor:
             json.dump(processes, f, indent=4, ensure_ascii=False)
 
         return processes
+
+
+def validate_graph(processes):
+    names = {p["process_name"] for p in processes}
+
+    for process in processes:
+        for child in process["next_processes"]:
+            if child not in names:
+                raise ValueError(
+                    f"{process['process_name']} references missing process '{child}'"
+                )

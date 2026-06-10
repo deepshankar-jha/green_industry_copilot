@@ -48,6 +48,7 @@ class Application {
 
     // create chat
     this.chat = new ChatUI("chatApp");
+    this.initializeChatToggle();
 
     this.initializeProcessGraph();
   }
@@ -89,6 +90,12 @@ class Application {
     document
       .querySelector("#submitBtn")
       .addEventListener("click", () => this.uploadFile());
+
+    document.getElementById("optimizeTab").addEventListener("click", () => {
+      this.optimizeProcessGraph(
+        "Reduce emissions, energy consumption and maximize recycling",
+      );
+    });
 
     // backend events
     this.socketManager.on("upload_progress", (data) =>
@@ -186,6 +193,8 @@ class Application {
 
   onProcessExtracted(data) {
     this.hideProcessingOverlay();
+    // save original process list
+    this.originalProcesses = data.processes;
 
     this.showDashboard();
 
@@ -244,14 +253,20 @@ class Application {
     switch (this.workspaceSelect.value) {
       case "original":
         document.getElementById("originalPanel").classList.remove("hidden");
+
+        requestAnimationFrame(() => {
+          this.originalGraph.resize();
+        });
+
         break;
 
       case "optimized":
         document.getElementById("optimizedPanel").classList.remove("hidden");
-        break;
 
-      case "insights":
-        document.getElementById("insightsPanel").classList.remove("hidden");
+        requestAnimationFrame(() => {
+          this.optimizedGraph.resize();
+        });
+
         break;
     }
   }
@@ -270,5 +285,42 @@ class Application {
     this.optimizedGraph = new ProcessNodeGraph("optimizedGraphCanvas");
 
     this.optimizedRenderer = new ProcessGraphRenderer(this.optimizedGraph);
+  }
+
+  optimizeProcessGraph(query) {
+    this.showProcessingOverlay();
+
+    fetch("/mock-optimize", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        processes: this.originalProcesses,
+        query: query,
+        socket_id: this.socketManager.getSocketId(),
+      }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        this.hideProcessingOverlay();
+
+        this.optimizedGraph.clear();
+
+        this.optimizedRenderer.render(data.optimized_processes);
+
+        // automatically switch view
+        this.workspaceSelect.value = "optimized";
+        this.switchWorkspacePanel();
+      });
+  }
+
+  initializeChatToggle() {
+    const btn = document.getElementById("chatToggleBtn");
+    const chat = document.getElementById("chatApp");
+
+    btn.addEventListener("click", () => {
+      chat.classList.toggle("collapsed");
+    });
   }
 }

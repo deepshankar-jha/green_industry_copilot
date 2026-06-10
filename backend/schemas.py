@@ -182,7 +182,7 @@ class ProcessStep(BaseModel):
     emissions: List[Emission]
     # Estimated operating cost of the process
     operating_cost: str
-    # Names or identifiers of downstream processes
+    # IDs of downstream processes
     next_processes: List[str]
 
 

@@ -5,19 +5,7 @@ Dashboard Chat Panel
 */
 
 .chat-panel {
-  width: 35%;
-  /*padding:10px;*/
-  background: #e8f3e8;
-
-  display: flex;
-}
-
-/* chat app should occupy the entire panel */
-.chat-panel #chatApp {
-  width: 100%;
-  height: 100%;
-
-  display: flex;
+  display: block;
 }
 
 /*
@@ -26,19 +14,19 @@ Main container
 ================================
 */
 .chat-container {
-  width: 100%;
-  height: 100%;
+  width: 420px;
+  height: 650px;
 
   background: #fdfefd;
 
-  /*border-radius:20px;*/
+  display: flex;
+  flex-direction: column;
+
+  border-radius: 20px;
 
   overflow: hidden;
 
-  /*box-shadow:0 10px 30px rgba(0,0,0,0.10);*/
-
-  display: flex;
-  flex-direction: column;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
 }
 
 /*
@@ -184,4 +172,40 @@ Button
 
 .chat-input button:hover {
   background: #25863a;
+}
+
+#chatToggleBtn {
+  width: 64px;
+  height: 64px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #2ea043;
+  color: white;
+
+  font-size: 28px;
+  cursor: pointer;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  z-index: 5002;
+  position: relative;
+}
+
+#chatApp {
+  position: absolute;
+
+  right: 0;
+  bottom: 85px;
+
+  width: 420px;
+  height: 650px;
+
+  display: block;
+
+  z-index: 5001;
+}
+
+#chatApp.collapsed {
+  display: none;
 }
