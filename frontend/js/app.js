@@ -19,6 +19,12 @@ class Application {
     this.uploader = null;
     this.socketManager = null;
 
+    this.originalGraph = null;
+    this.optimizedGraph = null;
+
+    this.originalRenderer = null;
+    this.optimizedRenderer = null;
+
     this.initialize();
   }
   /**
@@ -42,6 +48,8 @@ class Application {
 
     // create chat
     this.chat = new ChatUI("chatApp");
+
+    this.initializeProcessGraph();
   }
 
   /**
@@ -177,12 +185,23 @@ class Application {
   }
 
   onProcessExtracted(data) {
-    console.log("Processes extracted");
-    console.log(data.processes);
-
     this.hideProcessingOverlay();
 
     this.showDashboard();
+
+    //
+    // Original graph
+    //
+    this.originalGraph.clear();
+
+    this.originalRenderer.render(data.processes);
+
+    //
+    // Optimized graph
+    //
+    this.optimizedGraph.clear();
+
+    this.optimizedRenderer.render(data.optimized_processes || data.processes);
   }
 
   onProcessStatus(data) {
@@ -237,5 +256,21 @@ class Application {
         document.getElementById("insightsPanel").classList.remove("hidden");
         break;
     }
+  }
+
+  initializeProcessGraph() {
+    //
+    // Original graph
+    //
+    this.originalGraph = new ProcessNodeGraph("originalGraphCanvas");
+
+    this.originalRenderer = new ProcessGraphRenderer(this.originalGraph);
+
+    //
+    // Optimized graph
+    //
+    this.optimizedGraph = new ProcessNodeGraph("optimizedGraphCanvas");
+
+    this.optimizedRenderer = new ProcessGraphRenderer(this.optimizedGraph);
   }
 }
