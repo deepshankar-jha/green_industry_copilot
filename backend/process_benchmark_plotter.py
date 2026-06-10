@@ -606,13 +606,13 @@ class ProcessBenchmarkPlotter:
         self.plot_raw_materials()
         self.plot_products()
         self.plot_byproducts()
-        self.plot_histograms()
+        #self.plot_histograms()
         self.plot_distributions()
         self.plot_boxplots()
         self.plot_cumulative_metrics()
-        self.plot_heatmap()
-        self.plot_correlation_matrix()
-        self.plot_monthly_dashboard()
+        #self.plot_heatmap()
+        #self.plot_correlation_matrix()
+        #self.plot_monthly_dashboard()
 
         self.create_summary_table()
 

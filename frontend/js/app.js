@@ -189,18 +189,16 @@ class Application {
 
     this.showDashboard();
 
-    //
-    // Original graph
-    //
-    this.originalGraph.clear();
+    // give browser time to layout visible elements
+    requestAnimationFrame(() => {
+      this.originalGraph.resize();
+      this.optimizedGraph.resize();
+    });
 
+    this.originalGraph.clear();
     this.originalRenderer.render(data.processes);
 
-    //
-    // Optimized graph
-    //
     this.optimizedGraph.clear();
-
     this.optimizedRenderer.render(data.optimized_processes || data.processes);
   }
 

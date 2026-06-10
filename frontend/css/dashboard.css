@@ -178,3 +178,46 @@
   font-size: 32px;
   background: #eef5ee;
 }
+
+/* =================================
+   Dashboard Mode Buttons
+================================= */
+
+.dashboard-title-bar {
+  flex: 1;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 16px;
+}
+
+.dashboard-tab {
+  width: 150px;
+  height: 46px;
+
+  border: none;
+  border-radius: 14px;
+
+  background: #e8f3e8;
+  color: #1f3a2e;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.25s ease;
+}
+
+.dashboard-tab:hover {
+  background: #d8ead9;
+}
+
+.dashboard-tab.active {
+  background: #4f8b63;
+  color: white;
+
+  box-shadow: 0 4px 14px rgba(79, 139, 99, 0.25);
+}
