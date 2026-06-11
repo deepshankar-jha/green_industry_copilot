@@ -1,0 +1,52 @@
+@startuml
+title Green Industry Copilot
+
+skinparam activity {
+    BackgroundColor White
+    BorderColor Black
+}
+
+start
+
+:Upload industrial document;
+
+partition "Azure OpenAI Model" {
+    :Extract industrial processes;
+    :Generate structured process graph;
+}
+
+:Store original graph in session;
+
+partition "Foundry IQ\n(Azure AI Search)" {
+    :Index original graph;
+}
+
+if (Optimization requested?) then (Yes)
+
+    partition "Azure OpenAI Model" {
+        :Generate greener process network;
+        :Reduce emissions and improve efficiency;
+    }
+
+    :Store optimized graph;
+
+    partition "Foundry IQ\n(Azure AI Search)" {
+        :Index optimized graph;
+    }
+
+endif
+
+:User asks question;
+
+partition "Foundry IQ\n(Azure AI Search)" {
+    :Retrieve relevant processes;
+}
+
+partition "Azure OpenAI Model" {
+    :Generate conversational answer;
+}
+
+:Return response to user;
+
+stop
+@enduml

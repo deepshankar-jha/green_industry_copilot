@@ -1,0 +1,63 @@
+@startuml
+title Green Industry Copilot
+
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+
+actor User
+
+package "Frontend" {
+    component "Web UI"
+}
+
+package "Backend (FastAPI + Socket.IO)" {
+
+    component "Upload API"
+    component "Chat Manager"
+    component "Session Memory"
+
+    component "Process Extractor"
+    component "Process Optimizer"
+
+    component "Foundry IQ Manager"
+}
+
+package "Azure AI Models" {
+
+    component "Azure OpenAI\nProcess Extraction Model"
+
+    component "Azure OpenAI\nProcess Optimization Model"
+
+    component "GPT-4o-mini\nChat Model"
+}
+
+package "Foundry IQ" {
+
+    database "Azure AI Search\nProcess Knowledge Base"
+}
+
+User --> "Web UI"
+
+"Web UI" --> "Upload API"
+
+"Upload API" --> "Process Extractor"
+"Upload API" --> "Process Optimizer"
+
+"Process Extractor" --> "Azure OpenAI\nProcess Extraction Model"
+"Process Optimizer" --> "Azure OpenAI\nProcess Optimization Model"
+
+"Process Extractor" --> "Foundry IQ Manager"
+"Process Optimizer" --> "Foundry IQ Manager"
+
+"Foundry IQ Manager" --> "Azure AI Search\nProcess Knowledge Base"
+
+"Web UI" --> "Chat Manager"
+
+"Chat Manager" --> "Session Memory"
+
+"Chat Manager" --> "Foundry IQ Manager"
+"Chat Manager" --> "GPT-4o-mini\nChat Model"
+
+"Foundry IQ Manager" --> "Azure AI Search\nProcess Knowledge Base"
+
+@enduml

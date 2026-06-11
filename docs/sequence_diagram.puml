@@ -1,0 +1,69 @@
+@startuml
+title Green Industry Copilot
+
+actor User
+participant Frontend
+participant "FastAPI Backend" as API
+participant "Process Extractor" as Extractor
+participant "Azure OpenAI\n(Extraction Model)" as AOAI1
+participant "Process Optimizer" as Optimizer
+participant "Azure OpenAI\n(Optimization Model)" as AOAI2
+participant "Foundry IQ" as FIQ
+database "Azure AI Search" as Search
+participant "Chat Manager" as Chat
+participant "Azure OpenAI\n(Chat Model)" as AOAI3
+
+== Document Upload ==
+
+User -> Frontend : Upload document
+Frontend -> API : POST /upload
+
+API -> Extractor : extract_processes(file)
+
+Extractor -> AOAI1 : Structured extraction
+AOAI1 --> Extractor : Process graph JSON
+
+Extractor --> API : Original process graph
+
+API -> FIQ : upload_graph()
+FIQ -> Search : Store process documents
+Search --> FIQ : Indexed
+
+API --> Frontend : Process graph
+
+== Process Optimization ==
+
+User -> Frontend : Optimize processes
+Frontend -> API : POST /optimize
+
+API -> Optimizer : optimize_processes()
+
+Optimizer -> AOAI2 : Sustainability optimization
+AOAI2 --> Optimizer : Optimized graph
+
+Optimizer --> API : Optimized process graph
+
+API -> FIQ : upload_graph()
+FIQ -> Search : Update indexed knowledge
+Search --> FIQ : Indexed
+
+API --> Frontend : Optimized graph
+
+== Chat and Question Answering ==
+
+User -> Frontend : Ask question
+Frontend -> Chat : chat message
+
+Chat -> FIQ : retrieve(query)
+FIQ -> Search : Semantic search
+Search --> FIQ : Relevant processes
+
+FIQ --> Chat : Retrieved knowledge
+
+Chat -> AOAI3 : Generate response\nusing history + Foundry IQ knowledge
+AOAI3 --> Chat : Answer
+
+Chat --> Frontend : Chat response
+Frontend --> User : Display answer
+
+@enduml
