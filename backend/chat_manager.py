@@ -22,6 +22,7 @@ from threading import Lock
 from typing import Optional
 import json
 from openai import AsyncOpenAI
+from foundry_iq import FoundryIQManager
 
 
 # ==========================================================
@@ -113,6 +114,8 @@ class ChatManager:
 
         self.client = AsyncOpenAI()
         self.model = "gpt-4o-mini"
+
+        self.foundry_iq = FoundryIQManager()
 
     ##########################################################
     # Session handling
@@ -321,21 +324,6 @@ class ChatManager:
             if user_id in self.sessions:
                 del self.sessions[user_id]
 
-    def build_full_context(self, user_id: str, last_n_messages: int = 10):
-
-        session = self.get_session(user_id)
-
-        return f"""
-    Original Process Graph:
-    {json.dumps(session.original_process_graph, indent=2)}
-
-    Optimized Process Graph:
-    {json.dumps(session.optimized_process_graph, indent=2)}
-
-    Conversation History:
-    {self.build_context(user_id, last_n_messages)}
-    """
-
     async def _generate_response(self, prompt: str) -> str:
         response = await self.client.chat.completions.create(
             model=self.model,
@@ -369,14 +357,23 @@ class ChatManager:
         # store user message
         self.add_user_message(user_id, message)
 
-        context = self.build_full_context(user_id, last_n_messages=10)
+        history = self.build_context(user_id)
+
+        knowledge = self.foundry_iq.retrieve(query=message, user_id=user_id)
 
         prompt = f"""
-    {context}
+Retrieved Information:
 
-    User Question:
-    {message}
-    """
+{knowledge}
+
+Conversation History:
+
+{history}
+
+User Question:
+
+{message}
+"""
 
         response = await self._generate_response(prompt)
 

@@ -9,7 +9,7 @@ import json
 import os
 
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
+from langchain_openai import AzureChatOpenAI
 
 from schemas import *
 
@@ -35,17 +35,19 @@ class ProcessOptimizer:
     """
 
     def __init__(self, model: str = "gpt-5-mini"):
-
-        api_key = os.getenv("OPENAI_API_KEY")
-
-        if not api_key:
-            raise ValueError("OPENAI_API_KEY environment variable is not set.")
-
-        self.llm = ChatOpenAI(model=model, temperature=0.2)
+        self.llm = AzureChatOpenAI(
+            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+            api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+            azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
+            max_completion_tokens=50000,
+        )
 
     def optimize_processes(self, processes: list[dict]) -> list[dict]:
 
-        structured_llm = self.llm.with_structured_output(ProcessList)
+        structured_llm = self.llm.with_structured_output(
+            ProcessList, method="function_calling"
+        )
 
         prompt = f"""
 You are a sustainability and industrial process optimization expert.
@@ -109,8 +111,6 @@ Original graph:
 
         processes = [p.model_dump() for p in result.processes]
 
-        validate_graph(processes)
-
         return processes
 
     def load_json(self, filepath: str):
@@ -132,13 +132,3 @@ Original graph:
             json.dump(optimized, f, indent=4, ensure_ascii=False)
 
         return optimized
-
-def validate_graph(processes):
-    names = {p["process_name"] for p in processes}
-
-    for process in processes:
-        for child in process["next_processes"]:
-            if child not in names:
-                raise ValueError(
-                    f"{process['process_name']} references missing process '{child}'"
-                )

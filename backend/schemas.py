@@ -41,7 +41,7 @@ ProcessList
 
 from pydantic import BaseModel
 from typing import List
-
+import json
 
 class ProcessInput(BaseModel):
     """
@@ -188,3 +188,8 @@ class ProcessStep(BaseModel):
 
 class ProcessList(BaseModel):
     processes: List[ProcessStep]
+
+
+schema = ProcessList.model_json_schema()
+
+print(len(json.dumps(schema)))

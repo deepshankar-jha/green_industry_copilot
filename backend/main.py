@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from process_extractor import ProcessExtractor
 from process_optimizer import ProcessOptimizer
 from chat_manager import ChatManager
+from foundry_iq import FoundryIQManager
 
 
 class OptimizeRequest(BaseModel):
@@ -25,6 +26,7 @@ import socketio
 extractor = ProcessExtractor()
 optimizer = ProcessOptimizer()
 chat_manager = ChatManager()
+foundry_iq = FoundryIQManager()
 
 app = FastAPI()
 
@@ -88,6 +90,8 @@ async def upload_file(file: UploadFile = File(...), socket_id: str = Form(...)):
 
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(processes, f, indent=4, ensure_ascii=False)
+
+            await asyncio.to_thread(foundry_iq.upload_graph, str(json_path), socket_id)
 
         await sio.emit(
             "process_status",
@@ -154,6 +158,8 @@ async def mock_upload(file: UploadFile = File(...), socket_id: str = Form(...)):
     with open(json_path, "r", encoding="utf-8") as f:
         processes = json.load(f)
 
+        await asyncio.to_thread(foundry_iq.upload_graph, str(json_path), socket_id)
+
         chat_manager.update_original_graph(socket_id, processes)
 
     await sio.emit(
@@ -207,6 +213,10 @@ async def optimize_graph(req: OptimizeRequest):
     with open(optimized_graph_path, "w", encoding="utf-8") as f:
         json.dump(optimized_processes, f, indent=4, ensure_ascii=False)
 
+    await asyncio.to_thread(
+        foundry_iq.upload_graph, str(optimized_graph_path), req.socket_id
+    )
+
     return {"status": "success", "optimized_processes": optimized_processes}
 
 
@@ -220,8 +230,9 @@ async def mock_optimize(req: OptimizeRequest):
 
     with open(json_path, "r", encoding="utf-8") as f:
         optimized_processes = json.load(f)
-
-        chat_manager.update_optimized_graph(req.socket_id, optimized_processes)
+    await asyncio.to_thread(foundry_iq.upload_graph, str(json_path), req.socket_id)
+    
+    chat_manager.update_optimized_graph(req.socket_id, optimized_processes)
 
     # return exactly the same structure as /optimize
     return {

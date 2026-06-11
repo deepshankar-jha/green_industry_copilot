@@ -42,7 +42,7 @@ extractor.save_json(
 
 from pathlib import Path
 import json
-from langchain_openai import ChatOpenAI
+from openai import AzureOpenAI
 
 import docx
 from pypdf import PdfReader
@@ -90,12 +90,13 @@ class ProcessExtractor:
         ValueError
             If OPENAI_API_KEY is not available.
         """
-        api_key = os.getenv("OPENAI_API_KEY")
+        self.client = AzureOpenAI(
+            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+            api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+        )
 
-        if not api_key:
-            raise ValueError("OPENAI_API_KEY environment variable is not set.")
-
-        self.llm = ChatOpenAI(model=model, temperature=0)
+        self.model = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 
     ###############################################################################
     # File Readers
@@ -223,6 +224,53 @@ class ProcessExtractor:
     # LangChain structured output and Pydantic schemas.
     ###############################################################################
 
+    def _sanitize_document(self, document_text: str) -> str:
+        """
+        Normalize document text before structured extraction.
+
+        Returns
+        -------
+        str
+            Sanitized plain text.
+        """
+
+        prompt = f"""
+    Rewrite the following industrial document into a normalized plain-text form.
+
+    Requirements:
+
+    - Preserve ALL information.
+    - Preserve process ordering.
+    - Preserve process names exactly.
+    - Do not summarize.
+    - Do not add information.
+    - Use ASCII characters only.
+    - Replace superscripts with ^ notation.
+
+    Examples:
+
+    m³/day -> m^3/day
+    m² -> m^2
+    CO₂ -> CO2
+
+    For money:
+
+    ₹7,50,000/day -> INR 750000/day
+    $1800/hour -> USD 1800/hour
+
+    Preserve section headings and process numbering.
+
+    Return plain text only.
+
+    Document:
+
+    {document_text}
+    """
+
+        response = self.llm.invoke(prompt)
+
+        return response.content
+
     def extract_processes(self, filepath: str):
         """
         Extract industrial process steps from a document.
@@ -244,89 +292,33 @@ class ProcessExtractor:
 
         document_text = self.load_file(filepath)
 
-        structured_llm = self.llm.with_structured_output(ProcessList)
-
         prompt = f"""
+Extract all industrial processes from the document.
+
 Rules:
 
-- Extract every process step.
 - Preserve process ordering.
 - Preserve process names exactly.
 - Process names must be unique.
-- next_processes MUST contain process names, never IDs.
-- Every entry inside next_processes must exactly match an existing process_name.
-- Use identical spelling, spacing and capitalization.
-- Never abbreviate or rename processes.
-- A process may have multiple downstream processes.
-- Return an empty list if no processes exist.
-
-Consistency Rules:
-
-If a process is named:
-
-"Grinding"
-
-then every reference to it inside next_processes must be:
-
-["Grinding"]
-
-NOT:
-
-["grinding"]
-["GRINDING"]
-["Grinding Process"]
-["Grinder"]
-
-For all units:
-
-- Use ASCII characters only.
-- Never use superscripts such as ², ³, ⁴.
-- Never use Unicode symbols or control characters.
-- Represent powers using ^.
-
-Examples:
-
-m^3/day
-m^2
-ft^3
-kg/hour
-L/min
-
-Do not output:
-
-m³/day
-m²
-ft³
-kg·h⁻¹
-
-For all monetary values:
-
-- Always use ISO 4217 currency codes (INR, USD, EUR, GBP, JPY, etc.).
-- Never use currency symbols such as ₹, $, €, £, ¥.
-- Never output Unicode escape sequences or control characters.
-- Format monetary values as:
-
-"<CURRENCY_CODE> <amount>/<time_unit>"
-
-Examples:
-"INR 250000/day"
-"USD 1800/hour"
-"EUR 35000/year"
-
-Do not use:
-"₹2,50,000/day"
-"$1800/hour"
-"\u0012,50,000/day"
+- Never invent processes.
+- next_processes must contain process names, never IDs.
+- Every name inside next_processes must exactly match an existing process_name.
+- If downstream processes are unknown, use an empty list.
+- Use null for missing scalar values.
+- Use [] for missing lists.
+- Preserve all numerical values and units exactly.
 
 Document:
 
 {document_text}
 """
-        result = structured_llm.invoke(prompt)
+        response = self.client.responses.parse(
+            model=self.model, input=prompt, text_format=ProcessList
+        )
+
+        result = response.output_parsed
 
         processes = [p.model_dump() for p in result.processes]
-
-        validate_graph(processes)
 
         return processes
 
@@ -359,14 +351,3 @@ Document:
             json.dump(processes, f, indent=4, ensure_ascii=False)
 
         return processes
-
-
-def validate_graph(processes):
-    names = {p["process_name"] for p in processes}
-
-    for process in processes:
-        for child in process["next_processes"]:
-            if child not in names:
-                raise ValueError(
-                    f"{process['process_name']} references missing process '{child}'"
-                )
