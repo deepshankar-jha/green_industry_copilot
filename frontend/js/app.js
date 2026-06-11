@@ -15,6 +15,18 @@
  */
 
 class Application {
+  /**
+   * Creates the main application controller.
+   *
+   * Maintains references to:
+   * - File uploader.
+   * - Socket manager.
+   * - Original and optimized process graphs.
+   * - Graph renderers.
+   * - Chat interface.
+   *
+   * Immediately initializes all subsystems.
+   */
   constructor() {
     this.uploader = null;
     this.socketManager = null;
@@ -146,7 +158,7 @@ class Application {
     formData.append("file", file);
     formData.append("socket_id", this.socketManager.getSocketId());
 
-    fetch("/mock-upload", {
+    fetch("/upload", {
       method: "POST",
       body: formData,
     }).catch((err) => {
@@ -191,6 +203,23 @@ class Application {
     this.chat.receiveMessage(data.message);
   }
 
+  /**
+   * Handles completion of process extraction.
+   *
+   * Workflow:
+   * 1. Hide the processing overlay.
+   * 2. Store the extracted processes.
+   * 3. Switch from the landing page to the dashboard.
+   * 4. Resize graph canvases after layout becomes visible.
+   * 5. Render original processes.
+   * 6. Render optimized processes if available.
+   *
+   * @param {Object} data
+   * @param {Array<Object>} data.processes
+   *     Extracted process sequence.
+   * @param {Array<Object>} [data.optimized_processes]
+   *     Optimized process sequence returned by the backend.
+   */
   onProcessExtracted(data) {
     this.hideProcessingOverlay();
     // save original process list
@@ -211,24 +240,57 @@ class Application {
     this.optimizedRenderer.render(data.optimized_processes || data.processes);
   }
 
+  /**
+   * Handles status messages emitted during backend processing.
+   *
+   * Used for logging intermediate stages such as:
+   * - Extraction
+   * - Optimization
+   * - Validation
+   *
+   * @param {Object} data
+   * @param {string} data.status
+   * @param {string} data.message
+   */
   onProcessStatus(data) {
     console.log(`[${data.status}] ${data.message}`);
   }
 
+  /**
+   * Switches the UI from the landing page to the
+   * process dashboard view.
+   */
   showDashboard() {
     document.getElementById("landingPage").classList.add("hidden");
 
     document.getElementById("dashboard").classList.remove("hidden");
   }
 
+  /**
+   * Displays the processing overlay while long-running
+   * backend operations are executing.
+   *
+   * Prevents user interaction and indicates that work
+   * is currently in progress.
+   */
   showProcessingOverlay() {
     document.getElementById("processingOverlay").style.display = "flex";
   }
 
+  /**
+   * Hides the processing overlay and restores
+   * normal user interaction.
+   */
   hideProcessingOverlay() {
     document.getElementById("processingOverlay").style.display = "none";
   }
 
+  /**
+   * Registers the dashboard back button.
+   *
+   * Allows users to return from the dashboard
+   * to the landing page.
+   */
   registerBackButton() {
     document.getElementById("backBtn").addEventListener("click", () => {
       document.getElementById("dashboard").classList.add("hidden");
@@ -237,6 +299,13 @@ class Application {
     });
   }
 
+  /**
+   * Registers the workspace selector.
+   *
+   * Enables switching between:
+   * - Original process graph.
+   * - Optimized process graph.
+   */
   registerWorkspaceSwitcher() {
     this.workspaceSelect = document.getElementById("workspaceSelect");
 
@@ -245,6 +314,16 @@ class Application {
     );
   }
 
+  /**
+   * Switches the visible workspace panel.
+   *
+   * Supported views:
+   * - original
+   * - optimized
+   *
+   * After changing panels, the corresponding graph
+   * canvas is resized to ensure proper rendering.
+   */
   switchWorkspacePanel() {
     document
       .querySelectorAll(".workspace-view")
@@ -271,6 +350,14 @@ class Application {
     }
   }
 
+  /**
+   * Creates graph canvases and renderers for
+   * both process workspaces.
+   *
+   * Initializes:
+   * - Original process graph and renderer.
+   * - Optimized process graph and renderer.
+   */
   initializeProcessGraph() {
     //
     // Original graph
@@ -287,10 +374,25 @@ class Application {
     this.optimizedRenderer = new ProcessGraphRenderer(this.optimizedGraph);
   }
 
+  /**
+   * Requests optimization of the current process flow.
+   *
+   * Workflow:
+   * 1. Show processing overlay.
+   * 2. Send optimization request to the backend.
+   * 3. Wait for optimized process data.
+   * 4. Clear the previous optimized graph.
+   * 5. Render the new optimized graph.
+   * 6. Automatically switch the workspace to
+   *    the optimized view.
+   *
+   * @param {string} query
+   *     Optimization objective provided to the backend.
+   */
   optimizeProcessGraph(query) {
     this.showProcessingOverlay();
 
-    fetch("/mock-optimize", {
+    fetch("/optimize", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -315,6 +417,12 @@ class Application {
       });
   }
 
+  /**
+   * Registers the chat panel toggle button.
+   *
+   * Allows collapsing and expanding the AI assistant
+   * panel without removing it from the page.
+   */
   initializeChatToggle() {
     const btn = document.getElementById("chatToggleBtn");
     const chat = document.getElementById("chatApp");

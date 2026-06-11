@@ -1,10 +1,17 @@
 /**
  * @module ProcessNode
  *
- * Defines the ProcessNode class used by the process graph system.
- * A process node encapsulates position information together with
- * user-visible data such as title and description, and supports
- * arbitrary JSON metadata for application-specific information.
+ * Provides the ProcessNode class used by the process graph system.
+ *
+ * A ProcessNode represents a visual graph element containing:
+ * - title information
+ * - descriptive text
+ * - arbitrary metadata
+ * - expandable details
+ * - outgoing node connections
+ *
+ * The class also contains rendering utilities for drawing
+ * itself and its connections on an HTML5 canvas.
  */
 
 /**
@@ -91,14 +98,36 @@ class ProcessNode {
      */
     this.metaData = metaData;
 
+    /**
+     * Connected target nodes.
+     *
+     * Used by the renderer to draw outgoing edges.
+     *
+     * @type {ProcessNode[]}
+     */
     this.connections = [];
     this.width = 140;
     this.height = 60;
 
     this.showDetails = true;
+    /**
+     * Current node width in pixels.
+     *
+     * @type {number}
+     */
     this.width = 220;
+    /**
+     * Current node height in pixels.
+     *
+     * @type {number}
+     */
     this.height = 80;
 
+    /**
+     * Determines whether description and metadata are visible.
+     *
+     * @type {boolean}
+     */
     this.updateSize();
   }
 
@@ -138,16 +167,46 @@ class ProcessNode {
     return this.metaData;
   }
 
+  /**
+   * Creates an outgoing connection to another node.
+   *
+   * Duplicate connections are ignored.
+   *
+   * @param {ProcessNode} node
+   * Target node to connect to.
+   */
   connectTo(node) {
     if (!this.connections.includes(node)) {
       this.connections.push(node);
     }
   }
 
+  /**
+   * Removes an existing connection to a target node.
+   *
+   * @param {ProcessNode} node
+   * Target node to disconnect.
+   */
   disconnectFrom(node) {
     this.connections = this.connections.filter((n) => n !== node);
   }
 
+  /**
+   * Renders the node on a canvas context.
+   *
+   * Draws:
+   * - main body
+   * - header strip
+   * - collapse/expand button
+   * - title
+   * - description
+   * - metadata entries
+   *
+   * Hidden details mode displays only the header.
+   *
+   * @param {CanvasRenderingContext2D} ctx
+   * Canvas drawing context.
+   */
   render(ctx) {
     this.updateSize();
 
@@ -241,6 +300,15 @@ class ProcessNode {
     }
   }
 
+  /**
+   * Draws all outgoing connections from this node.
+   *
+   * Connections are rendered as vertical Bézier curves
+   * ending with an arrow head.
+   *
+   * @param {CanvasRenderingContext2D} ctx
+   * Canvas drawing context.
+   */
   renderConnections(ctx) {
     ctx.strokeStyle = "#40c4ff";
     ctx.fillStyle = "#40c4ff";
@@ -267,6 +335,16 @@ class ProcessNode {
     }
   }
 
+  /**
+   * Draws an arrow head at the specified position.
+   *
+   * @param {CanvasRenderingContext2D} ctx
+   * Canvas drawing context.
+   * @param {number} x
+   * Arrow tip x-coordinate.
+   * @param {number} y
+   * Arrow tip y-coordinate.
+   */
   drawArrow(ctx, x, y) {
     ctx.beginPath();
 
@@ -278,6 +356,19 @@ class ProcessNode {
     ctx.fill();
   }
 
+  /**
+   * Determines whether a point lies inside the node.
+   *
+   * Used for hit-testing during mouse interaction.
+   *
+   * @param {number} x
+   * X-coordinate to test.
+   * @param {number} y
+   * Y-coordinate to test.
+   *
+   * @returns {boolean}
+   * True if the point lies within the node bounds.
+   */
   contains(x, y) {
     return (
       x >= this.x &&
@@ -287,11 +378,24 @@ class ProcessNode {
     );
   }
 
+  /**
+   * Toggles expanded and collapsed display modes.
+   *
+   * Recalculates node dimensions after changing state.
+   */
   toggleDetails() {
     this.showDetails = !this.showDetails;
     this.updateSize();
   }
 
+  /**
+   * Recalculates the dimensions of the node.
+   *
+   * Width is estimated from the longest text line,
+   * while height depends on the number of displayed rows.
+   *
+   * Collapsed nodes use fixed dimensions.
+   */
   updateSize() {
     if (!this.showDetails) {
       this.width = 220;
@@ -325,12 +429,45 @@ class ProcessNode {
     this.height = 60 + lines.length * 20 + 20;
   }
 
+  /**
+   * Determines whether a point intersects the
+   * expand/collapse button.
+   *
+   * @param {number} x
+   * X-coordinate to test.
+   * @param {number} y
+   * Y-coordinate to test.
+   *
+   * @returns {boolean}
+   * True if the toggle button was clicked.
+   */
   isToggleButtonHit(x, y) {
     return (
       x >= this.x + 5 && x <= this.x + 21 && y >= this.y + 5 && y <= this.y + 21
     );
   }
 
+  /**
+   * Draws wrapped text inside a bounded width.
+   *
+   * Words are automatically split into multiple lines.
+   *
+   * @param {CanvasRenderingContext2D} ctx
+   * Canvas drawing context.
+   * @param {string} text
+   * Text to render.
+   * @param {number} x
+   * Starting x-coordinate.
+   * @param {number} y
+   * Starting y-coordinate.
+   * @param {number} maxWidth
+   * Maximum line width.
+   * @param {number} lineHeight
+   * Height between lines.
+   *
+   * @returns {number}
+   * Y-coordinate immediately below the last rendered line.
+   */
   drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
     const words = text.split(" ");
     let line = "";
@@ -353,6 +490,17 @@ class ProcessNode {
     return y + lineHeight;
   }
 
+  /**
+   * Measures the rendered width of the title.
+   *
+   * Additional padding is included to prevent clipping.
+   *
+   * @param {CanvasRenderingContext2D} ctx
+   * Canvas drawing context.
+   *
+   * @returns {number}
+   * Required width in pixels.
+   */
   measureTitleWidth(ctx) {
     ctx.save();
     ctx.font = "bold 16px Arial";
@@ -362,6 +510,25 @@ class ProcessNode {
     return width + 50; // left/right padding
   }
 
+  /**
+   * Creates a rounded rectangle path.
+   *
+   * The method only defines the path and does not
+   * automatically fill or stroke it.
+   *
+   * @param {CanvasRenderingContext2D} ctx
+   * Canvas drawing context.
+   * @param {number} x
+   * Left coordinate.
+   * @param {number} y
+   * Top coordinate.
+   * @param {number} width
+   * Rectangle width.
+   * @param {number} height
+   * Rectangle height.
+   * @param {number} radius
+   * Corner radius.
+   */
   roundRect(ctx, x, y, width, height, radius) {
     ctx.beginPath();
     ctx.moveTo(x + radius, y);

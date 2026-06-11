@@ -1,3 +1,57 @@
+"""
+main.py
+
+Primary API entry point for the Process Intelligence platform.
+
+Responsibilities
+----------------
+- Accept document uploads from clients.
+- Extract process graphs from uploaded files.
+- Store per-session process information.
+- Upload graphs to FoundryIQ.
+- Optimize extracted process graphs.
+- Provide chat capabilities through Socket.IO.
+- Serve frontend static assets.
+- Expose FastAPI and Socket.IO applications.
+
+Main Components
+---------------
+- ProcessExtractor:
+    Converts uploaded documents into process graphs.
+
+- ProcessOptimizer:
+    Produces optimized versions of extracted processes.
+
+- ChatManager:
+    Maintains session state and handles conversational queries.
+
+- FoundryIQManager:
+    Uploads graph data for external analysis.
+
+Session Storage
+---------------
+Each client session uses:
+
+    uploads/<socket_id>/
+
+containing:
+
+    original_graph.json
+    optimized_graph.json
+
+Architecture
+------------
+Frontend
+    ↓
+FastAPI Endpoints
+    ↓
+Process Extraction / Optimization
+    ↓
+ChatManager + FoundryIQ
+    ↓
+Socket.IO Notifications
+"""
+
 from pathlib import Path
 from fastapi import FastAPI, UploadFile, File
 from fastapi.staticfiles import StaticFiles
@@ -8,6 +62,7 @@ import json
 from pathlib import Path
 from socket_server import sio
 from pydantic import BaseModel
+import socketio
 
 from process_extractor import ProcessExtractor
 from process_optimizer import ProcessOptimizer
@@ -16,20 +71,46 @@ from foundry_iq import FoundryIQManager
 
 
 class OptimizeRequest(BaseModel):
+    """
+    Request model used by the optimization endpoint.
+
+    Attributes
+    ----------
+    processes : list[dict]
+        Process graph to optimize.
+
+    query : str
+        Optional optimization query from the client.
+
+    socket_id : str
+        Socket.IO session identifier used to maintain
+        per-user state and event communication.
+    """
+
     processes: list[dict]
     query: str
     socket_id: str
 
 
-import socketio
-
+extractor = ProcessExtractor()
+optimizer = ProcessOptimizer()
 chat_manager = ChatManager()
 foundry_iq = FoundryIQManager()
 
 app = FastAPI()
 
 # ----------------------------------------------------
-# Upload directory
+# Upload Storage Configuration
+#
+# Creates the root directory used for storing
+# session-specific files and graph JSON documents.
+#
+# Structure:
+#
+# uploads/
+#     <socket_id>/
+#         original_graph.json
+#         optimized_graph.json
 # ----------------------------------------------------
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
@@ -40,8 +121,43 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 # ----------------------------------------------------
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...), socket_id: str = Form(...)):
+    """
+    Upload a document and extract process information.
 
-    extractor = ProcessExtractor()
+    Workflow
+    --------
+    1. Save the uploaded file.
+    2. Notify the frontend of upload status.
+    3. Extract processes from the document.
+    4. Store the original graph in memory.
+    5. Persist the graph as JSON.
+    6. Upload the graph to FoundryIQ.
+    7. Send extraction results back through Socket.IO.
+
+    Parameters
+    ----------
+    file : UploadFile
+        Document provided by the user.
+
+    socket_id : str
+        Socket.IO session identifier.
+
+    Returns
+    -------
+    dict
+        Success response containing:
+
+        - status
+        - filename
+        - JSON filename
+        - extracted processes
+
+    Raises
+    ------
+    Exception
+        Any extraction or upload failures are returned
+        as error responses and emitted to the client.
+    """
 
     await sio.emit(
         "process_status",
@@ -142,7 +258,32 @@ async def upload_file(file: UploadFile = File(...), socket_id: str = Form(...)):
 # ----------------------------------------------------
 @app.post("/mock-upload")
 async def mock_upload(file: UploadFile = File(...), socket_id: str = Form(...)):
-    # notify upload
+    """
+    Simulate file upload using predefined process data.
+
+    Intended for development and testing.
+
+    Instead of performing document extraction,
+    the endpoint loads a mock graph from:
+
+        uploads/mock/original_graph.json
+
+    and returns the same response structure as
+    the real upload endpoint.
+
+    Parameters
+    ----------
+    file : UploadFile
+        Placeholder uploaded file.
+
+    socket_id : str
+        Client Socket.IO session identifier.
+
+    Returns
+    -------
+    dict
+        Mock extraction result.
+    """
     await sio.emit(
         "process_status",
         {"status": "file_uploaded", "message": f"{file.filename} uploaded"},
@@ -199,8 +340,26 @@ async def mock_upload(file: UploadFile = File(...), socket_id: str = Form(...)):
 
 @app.post("/optimize")
 async def optimize_graph(req: OptimizeRequest):
+    """
+    Optimize an existing process graph.
 
-    optimizer = ProcessOptimizer()
+    Workflow
+    --------
+    1. Run ProcessOptimizer.
+    2. Save optimized graph in ChatManager.
+    3. Persist optimized graph to disk.
+    4. Upload graph to FoundryIQ.
+
+    Parameters
+    ----------
+    req : OptimizeRequest
+        Optimization request payload.
+
+    Returns
+    -------
+    dict
+        Contains the optimized process graph.
+    """
 
     optimized_processes = await asyncio.to_thread(
         optimizer.optimize_processes, req.processes
@@ -239,7 +398,28 @@ async def optimize_graph(req: OptimizeRequest):
 # ----------------------------------------------------
 @app.post("/mock-optimize")
 async def mock_optimize(req: OptimizeRequest):
+    """
+    Load and return a predefined optimized graph.
 
+    Used for development and UI testing.
+
+    Reads:
+
+        uploads/mock/optimized_graph.json
+
+    and returns the same response format as the
+    production optimization endpoint.
+
+    Parameters
+    ----------
+    req : OptimizeRequest
+        Request containing the client session id.
+
+    Returns
+    -------
+    dict
+        Mock optimization response.
+    """
     json_path = Path("./uploads/mock/optimized_graph.json")
 
     with open(json_path, "r", encoding="utf-8") as f:
@@ -257,6 +437,35 @@ async def mock_optimize(req: OptimizeRequest):
 
 @sio.event
 async def chat_message(sid, data):
+    """
+    Handle incoming chat messages.
+
+    Receives a message from a connected client,
+    forwards it to ChatManager, and sends the
+    generated response back through Socket.IO.
+
+    Parameters
+    ----------
+    sid : str
+        Socket.IO client identifier.
+
+    data : dict
+        Incoming payload expected to contain:
+
+            {
+                "message": "<user message>"
+            }
+
+    Emits
+    -----
+    chat_response
+        Response generated by ChatManager.
+
+    Error Handling
+    --------------
+    Exceptions are logged and returned to the
+    client as error messages.
+    """
     try:
         message = data.get("message", "")
 
@@ -285,13 +494,28 @@ app.mount("/js", StaticFiles(directory="../frontend/js"), name="js")
 # ----------------------------------------------------
 @app.get("/")
 async def home():
+    """
+    Serve the frontend application's entry page.
+
+    Returns
+    -------
+    FileResponse
+        index.html from the frontend directory.
+    """
     return FileResponse(Path("../frontend/index.html"))
 
 
 # ----------------------------------------------------
-# Socket.IO ASGI application
+# Socket.IO ASGI Application
+#
+# Combines FastAPI HTTP endpoints with Socket.IO
+# real-time communication into a single ASGI app.
+#
+# Handles:
+#     - HTTP requests
+#     - WebSocket connections
+#     - Event emissions
+#     - Chat interactions
+#     - Process status notifications
 # ----------------------------------------------------
-# Socket.IO server
-
-# Combined FastAPI + Socket.IO ASGI application
 socket_app = socketio.ASGIApp(sio, other_asgi_app=app)

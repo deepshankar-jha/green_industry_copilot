@@ -44,7 +44,29 @@ class ProcessOptimizer:
         )
 
     def optimize_processes(self, processes: list[dict]) -> list[dict]:
+        """
+        Generate a sustainability-optimized version of an industrial
+        process graph.
 
+        Parameters
+        ----------
+        processes : list[dict]
+            Original process graph.
+
+        Returns
+        -------
+        list[dict]
+            Optimized process graph produced by the LLM.
+
+        Notes
+        -----
+        The model is instructed to preserve graph consistency while
+        improving emissions, energy efficiency, waste utilization,
+        water reuse, and circular-economy characteristics.
+        """
+
+        # Configure the model to return a response that conforms
+        # to the ProcessList schema.
         structured_llm = self.llm.with_structured_output(
             ProcessList, method="function_calling"
         )

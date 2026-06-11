@@ -77,18 +77,30 @@ class ProcessExtractor:
 
     def __init__(self):
         """
-        Initialize the extractor and create the OpenAI client.
+        Initialize the Azure OpenAI language model client.
 
-        Parameters
-        ----------
-        model : str
-            OpenAI model name.
+        Environment Variables
+        ---------------------
+        AZURE_OPENAI_API_KEY
+            API key used for authentication.
 
-        Raises
-        ------
-        ValueError
-            If OPENAI_API_KEY is not available.
+        AZURE_OPENAI_ENDPOINT
+            Azure OpenAI endpoint URL.
+
+        AZURE_OPENAI_DEPLOYMENT
+            Deployment name (model identifier).
+
+        Notes
+        -----
+        Temperature is fixed to zero to maximize deterministic
+        extraction results.
         """
+
+        ###############################################################################
+        # Language Model Initialization
+        #
+        # Creates the Azure OpenAI client used for process extraction.
+        ###############################################################################
         self.llm = ChatOpenAI(
             api_key=os.getenv("AZURE_OPENAI_API_KEY"),
             base_url=os.getenv("AZURE_OPENAI_ENDPOINT"),
@@ -123,7 +135,17 @@ class ProcessExtractor:
 
     def _load_md(self, filepath: str) -> str:
         """
-        Read a markdown file and return its contents.
+        Read a Markdown document.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to the markdown file.
+
+        Returns
+        -------
+        str
+            Markdown file contents.
         """
         with open(filepath, "r", encoding="utf-8") as f:
             return f.read()
@@ -224,24 +246,47 @@ class ProcessExtractor:
     ###############################################################################
     def extract_processes(self, filepath: str):
         """
-        Extract industrial process steps from a document.
+        Extract industrial processes from a document.
 
-        The document is first converted to text and then passed to the
-        language model. The model returns data that conforms to the
-        ProcessList schema.
+        The input document is converted to plain text and submitted to
+        the language model together with normalization and validation
+        rules. The model output is validated against the ProcessList
+        schema and returned as ordinary dictionaries.
 
         Parameters
         ----------
         filepath : str
-            Input document path.
+            Path to the source document.
 
         Returns
         -------
         list[dict]
-            List of extracted process dictionaries.
+            List containing structured process definitions.
+
+        Notes
+        -----
+        The extraction procedure enforces:
+
+        - Preservation of process ordering.
+        - Unique process names.
+        - Exact downstream references.
+        - No inferred or invented processes.
+        - Preservation of all numerical values and units.
         """
 
         document_text = self.load_file(filepath)
+
+        ###############################################################################
+        # Prompt Construction
+        #
+        # The prompt performs two tasks:
+        #
+        # 1. Normalize the source document into a plain-text representation.
+        # 2. Extract industrial processes into a structured schema.
+        #
+        # Strict validation rules are included to prevent hallucinated
+        # processes and invalid next_processes references.
+        ###############################################################################
 
         prompt = f"""Rewrite the following industrial document into a normalized plain-text form and extract all industrial processes.
 
@@ -297,10 +342,20 @@ Document:
 {document_text}
 """
 
+        ###############################################################################
+        # Structured Output Generation
+        #
+        # LangChain validates the model response against the ProcessList
+        # Pydantic schema to ensure type-safe extraction.
+        ###############################################################################
         structured_llm = self.llm.with_structured_output(ProcessList)
 
         result = structured_llm.invoke(prompt)
 
+        ###############################################################################
+        # Convert Pydantic objects into standard dictionaries suitable
+        # for JSON serialization.
+        ###############################################################################
         processes = [p.model_dump() for p in result.processes]
 
         return processes
@@ -313,12 +368,12 @@ Document:
 
     def save_json(self, filepath: str, output_path: str):
         """
-        Extract process information and save it as a JSON file.
+        Extract processes from a document and save them to a JSON file.
 
         Parameters
         ----------
         filepath : str
-            Source document.
+            Source document path.
 
         output_path : str
             Destination JSON file.
@@ -326,7 +381,12 @@ Document:
         Returns
         -------
         list[dict]
-            Extracted process data.
+            Structured process data written to disk.
+
+        Notes
+        -----
+        The JSON output is formatted with indentation to improve
+        readability and preserve Unicode characters.
         """
         processes = self.extract_processes(filepath)
 
@@ -334,3 +394,17 @@ Document:
             json.dump(processes, f, indent=4, ensure_ascii=False)
 
         return processes
+
+
+###############################################################################
+# Example
+#
+# extractor = ProcessExtractor()
+#
+# processes = extractor.extract_processes("plant_processes.pdf")
+#
+# extractor.save_json(
+#     "plant_processes.pdf",
+#     "processes.json"
+# )
+###############################################################################

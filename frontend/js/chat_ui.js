@@ -1,20 +1,35 @@
 /**
- * @module ChatUI
+ * @file chat_ui.js
  * @description
- * A lightweight browser-based chat interface implemented as a single class.
- * The class encapsulates rendering, event handling, message management,
- * automatic scrolling, and a simulated bot response.
+ * Browser-based chat UI component responsible for:
+ * - Rendering the chat interface
+ * - Handling user input and events
+ * - Displaying incoming and outgoing messages
+ * - Managing loading/thinking state
+ * - Automatically scrolling to the newest message
  *
- * Features:
- * - Dynamic UI generation
- * - User message input
- * - Enter key support
- * - Message display with user and bot styling
- * - Automatic scrolling
- * - Chat clearing capability
+ * Dependencies:
+ * - DOM APIs
+ * - Optional window.app.socketManager for server communication
  *
- * Example:
+ * Usage:
  * const chat = new ChatUI("chatApp");
+ */
+
+/**
+ * Chat user interface controller.
+ *
+ * Encapsulates all UI logic related to:
+ * - Creating chat elements
+ * - Event registration
+ * - Sending messages
+ * - Receiving messages
+ * - Message rendering
+ * - Loading indicator management
+ * - Automatic scrolling
+ *
+ * Communication with the backend is delegated to
+ * window.app.socketManager when available.
  */
 class ChatUI {
   /**
@@ -107,11 +122,16 @@ class ChatUI {
   }
 
   /**
-   * Sends the current contents of the input field.
+   * Sends the contents of the input field.
    *
-   * Removes surrounding whitespace, ignores empty messages,
-   * adds the user's message to the conversation, clears the
-   * input field, and generates a simulated bot reply.
+   * Workflow:
+   * 1. Reads and trims the input text.
+   * 2. Ignores empty messages.
+   * 3. Displays the message in the UI.
+   * 4. Clears the input box.
+   * 5. Shows the thinking indicator.
+   * 6. Emits a "chat_message" event through the
+   *    application's socket manager.
    *
    * @returns {void}
    */
@@ -125,7 +145,8 @@ class ChatUI {
     this.inputField.value = "";
     this.showThinking();
 
-    // Demo bot response
+    // Forward the message to the backend if a socket
+    // connection has been initialized.
     if (window.app && window.app.socketManager) {
       window.app.socketManager.emit("chat_message", {
         message: text,
@@ -171,6 +192,7 @@ class ChatUI {
 
     message.classList.add("message");
 
+    // Apply sender-specific styling.
     if (sender === "user") {
       message.classList.add("user-message");
     } else {
@@ -208,10 +230,26 @@ class ChatUI {
     this.messagesArea.innerHTML = "";
   }
 
+  /**
+   * Displays the "Thinking..." indicator.
+   *
+   * Used while waiting for a response from the server
+   * or chatbot.
+   *
+   * @returns {void}
+   */
   showThinking() {
     this.chat.querySelector(".chat-thinking").classList.remove("hidden");
   }
 
+  /**
+   * Hides the "Thinking..." indicator.
+   *
+   * Called when a response has been received and
+   * normal message display resumes.
+   *
+   * @returns {void}
+   */
   hideThinking() {
     this.chat.querySelector(".chat-thinking").classList.add("hidden");
   }
