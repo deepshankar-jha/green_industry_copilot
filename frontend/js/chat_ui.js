@@ -54,8 +54,22 @@ class ChatUI {
     this.container.innerHTML = `
             <div class="chat-container">
                 <div class="chat-header">
-                    Communication Assistent
+
+                <span class="chat-title">
+                    Communication Assistant
+                </span>
+
+                <div class="chat-thinking hidden">
+
+                    <div class="chat-spinner"></div>
+
+                    <span class="chat-thinking-text">
+                        Thinking...
+                    </span>
+
                 </div>
+
+            </div>
 
                 <div class="chat-messages"></div>
 
@@ -109,6 +123,7 @@ class ChatUI {
     this.addMessage(text, "user");
 
     this.inputField.value = "";
+    this.showThinking();
 
     // Demo bot response
     if (window.app && window.app.socketManager) {
@@ -130,6 +145,7 @@ class ChatUI {
    * @returns {void}
    */
   receiveMessage(text) {
+    this.hideThinking();
     this.addMessage(text, "bot");
   }
 
@@ -190,5 +206,13 @@ class ChatUI {
    */
   clear() {
     this.messagesArea.innerHTML = "";
+  }
+
+  showThinking() {
+    this.chat.querySelector(".chat-thinking").classList.remove("hidden");
+  }
+
+  hideThinking() {
+    this.chat.querySelector(".chat-thinking").classList.add("hidden");
   }
 }

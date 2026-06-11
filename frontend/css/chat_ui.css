@@ -38,12 +38,46 @@ Header
   background: #2ea043;
   color: white;
 
-  padding: 18px;
+  padding: 18px 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
   font-size: 20px;
   font-weight: bold;
 }
 
+.chat-thinking {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.chat-spinner {
+  width: 18px;
+  height: 18px;
+
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+
+  border-radius: 50%;
+
+  animation: chatSpin 1s linear infinite;
+}
+
+@keyframes chatSpin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
 /*
 ================================
 Messages
