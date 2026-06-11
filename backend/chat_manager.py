@@ -20,6 +20,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from threading import Lock
 from typing import Optional
+import json
+from openai import AsyncOpenAI
 
 
 # ==========================================================
@@ -108,6 +110,9 @@ class ChatManager:
         """
         self.sessions: dict[str, UserSession] = {}
         self.lock = Lock()
+
+        self.client = AsyncOpenAI()
+        self.model = "gpt-4o-mini"
 
     ##########################################################
     # Session handling
@@ -315,3 +320,67 @@ class ChatManager:
 
             if user_id in self.sessions:
                 del self.sessions[user_id]
+
+    def build_full_context(self, user_id: str, last_n_messages: int = 10):
+
+        session = self.get_session(user_id)
+
+        return f"""
+    Original Process Graph:
+    {json.dumps(session.original_process_graph, indent=2)}
+
+    Optimized Process Graph:
+    {json.dumps(session.optimized_process_graph, indent=2)}
+
+    Conversation History:
+    {self.build_context(user_id, last_n_messages)}
+    """
+
+    async def _generate_response(self, prompt: str) -> str:
+        response = await self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a helpful process optimization assistant.\n"
+                        "Answer questions using the original process graph, "
+                        "optimized process graph, and conversation history.\n\n"
+                        "Guidelines:\n"
+                        "- Keep answers short and easy to understand.\n"
+                        "- Use simple language suitable for non-experts.\n"
+                        "- Avoid technical jargon unless necessary.\n"
+                        "- Explain benefits and changes clearly.\n"
+                        "- Use bullet points when helpful.\n"
+                        "- Limit responses to 3-5 sentences unless the user asks for more details."
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ],
+        )
+
+        return response.choices[0].message.content
+
+    async def chat(self, user_id: str, message: str) -> str:
+        """
+        Main conversational interface.
+        """
+
+        # store user message
+        self.add_user_message(user_id, message)
+
+        context = self.build_full_context(user_id, last_n_messages=10)
+
+        prompt = f"""
+    {context}
+
+    User Question:
+    {message}
+    """
+
+        response = await self._generate_response(prompt)
+
+        # store assistant message
+        self.add_assistant_message(user_id, response)
+
+        return response

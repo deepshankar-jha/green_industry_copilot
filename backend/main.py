@@ -1,18 +1,17 @@
 from pathlib import Path
-
 from fastapi import FastAPI, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi import Form
 import asyncio
-
 import json
 from pathlib import Path
+from socket_server import sio
+from pydantic import BaseModel
+
 from process_extractor import ProcessExtractor
 from process_optimizer import ProcessOptimizer
-from socket_server import sio
-
-from pydantic import BaseModel
+from chat_manager import ChatManager
 
 
 class OptimizeRequest(BaseModel):
@@ -25,6 +24,8 @@ import socketio
 
 extractor = ProcessExtractor()
 optimizer = ProcessOptimizer()
+chat_manager = ChatManager()
+
 app = FastAPI()
 
 # ----------------------------------------------------
@@ -72,6 +73,9 @@ async def upload_file(file: UploadFile = File(...), socket_id: str = Form(...)):
     try:
         # extract processes
         processes = await asyncio.to_thread(extractor.extract_processes, str(file_path))
+
+        # store original graph in session
+        chat_manager.update_original_graph(socket_id, processes)
 
         # ----------------------------------------------------
         # Save extracted JSON with same filename
@@ -150,6 +154,8 @@ async def mock_upload(file: UploadFile = File(...), socket_id: str = Form(...)):
     with open(json_path, "r", encoding="utf-8") as f:
         processes = json.load(f)
 
+        chat_manager.update_original_graph(socket_id, processes)
+
     await sio.emit(
         "process_status",
         {
@@ -186,6 +192,9 @@ async def optimize_graph(req: OptimizeRequest):
         optimizer.optimize_processes, req.processes
     )
 
+    # save optimized graph in memory
+    chat_manager.update_optimized_graph(req.socket_id, optimized_processes)
+
     # ----------------------------------------------------
     # Save optimized graph
     # uploads/<socket_id>/optimized_graph.json
@@ -212,6 +221,8 @@ async def mock_optimize(req: OptimizeRequest):
     with open(json_path, "r", encoding="utf-8") as f:
         optimized_processes = json.load(f)
 
+        chat_manager.update_optimized_graph(req.socket_id, optimized_processes)
+
     # return exactly the same structure as /optimize
     return {
         "status": "success",
@@ -221,23 +232,9 @@ async def mock_optimize(req: OptimizeRequest):
 
 @sio.event
 async def chat_message(sid, data):
-    """
-    Mock chat endpoint.
-    Receives:
-    {
-        "message": "..."
-    }
-    """
-
     message = data.get("message", "")
-
-    await asyncio.sleep(0.5)
-
-    await sio.emit(
-        "chat_response",
-        {"message": f"Mock response for: {message}"},
-        to=sid,
-    )
+    response = await chat_manager.chat(sid, message)
+    await sio.emit("chat_response", {"message": response}, to=sid)
 
 
 # ----------------------------------------------------
