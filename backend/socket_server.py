@@ -22,8 +22,13 @@ import socketio
 # --------------------------------------------------------------------
 # Create an asynchronous Socket.IO server that works with ASGI
 # applications and allows requests from any origin.
-sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
-
+sio = socketio.AsyncServer(
+    async_mode="asgi",
+    cors_allowed_origins="*",
+    max_http_buffer_size=1024 * 1024 * 1024,
+    ping_timeout=300,
+    ping_interval=25,
+)
 # maps browser socket id -> metadata
 connected_clients = {}
 

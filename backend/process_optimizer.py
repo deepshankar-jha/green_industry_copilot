@@ -9,7 +9,7 @@ import json
 import os
 
 from dotenv import load_dotenv
-from langchain_openai import AzureChatOpenAI
+from langchain_openai import ChatOpenAI
 
 from schemas import *
 
@@ -34,13 +34,13 @@ class ProcessOptimizer:
     - Preserve process ordering where practical.
     """
 
-    def __init__(self, model: str = "gpt-5-mini"):
-        self.llm = AzureChatOpenAI(
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    def __init__(self):
+        self.llm = ChatOpenAI(
             api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-            azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
-            max_completion_tokens=50000,
+            base_url=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            model=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
+            temperature=0,
+            max_completion_tokens=30000,
         )
 
     def optimize_processes(self, processes: list[dict]) -> list[dict]:

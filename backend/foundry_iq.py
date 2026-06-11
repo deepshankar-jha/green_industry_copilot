@@ -52,7 +52,10 @@ class FoundryIQManager:
                 }
             )
 
-        self.client.upload_documents(docs)
+        result = self.client.upload_documents(documents=docs)
+
+        for r in result:
+            print(r.succeeded, r.key, r.error_message)
 
     def retrieve(self, query: str, user_id: str, top_k: int = 5):
 

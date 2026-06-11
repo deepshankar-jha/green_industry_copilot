@@ -23,8 +23,6 @@ class OptimizeRequest(BaseModel):
 
 import socketio
 
-extractor = ProcessExtractor()
-optimizer = ProcessOptimizer()
 chat_manager = ChatManager()
 foundry_iq = FoundryIQManager()
 
@@ -42,6 +40,8 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 # ----------------------------------------------------
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...), socket_id: str = Form(...)):
+
+    extractor = ProcessExtractor()
 
     await sio.emit(
         "process_status",
@@ -89,9 +89,15 @@ async def upload_file(file: UploadFile = File(...), socket_id: str = Form(...)):
         json_path = user_dir / "original_graph.json"
 
         with open(json_path, "w", encoding="utf-8") as f:
-            json.dump(processes, f, indent=4, ensure_ascii=False)
+            json.dump(
+                processes,
+                f,
+                indent=1,
+                ensure_ascii=False,
+                separators=(",", ":"),
+            )
 
-            await asyncio.to_thread(foundry_iq.upload_graph, str(json_path), socket_id)
+        await asyncio.to_thread(foundry_iq.upload_graph, str(json_path), socket_id)
 
         await sio.emit(
             "process_status",
@@ -194,6 +200,8 @@ async def mock_upload(file: UploadFile = File(...), socket_id: str = Form(...)):
 @app.post("/optimize")
 async def optimize_graph(req: OptimizeRequest):
 
+    optimizer = ProcessOptimizer()
+
     optimized_processes = await asyncio.to_thread(
         optimizer.optimize_processes, req.processes
     )
@@ -211,7 +219,13 @@ async def optimize_graph(req: OptimizeRequest):
     optimized_graph_path = user_dir / "optimized_graph.json"
 
     with open(optimized_graph_path, "w", encoding="utf-8") as f:
-        json.dump(optimized_processes, f, indent=4, ensure_ascii=False)
+        json.dump(
+            optimized_processes,
+            f,
+            indent=1,
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
 
     await asyncio.to_thread(
         foundry_iq.upload_graph, str(optimized_graph_path), req.socket_id
@@ -231,7 +245,7 @@ async def mock_optimize(req: OptimizeRequest):
     with open(json_path, "r", encoding="utf-8") as f:
         optimized_processes = json.load(f)
     await asyncio.to_thread(foundry_iq.upload_graph, str(json_path), req.socket_id)
-    
+
     chat_manager.update_optimized_graph(req.socket_id, optimized_processes)
 
     # return exactly the same structure as /optimize
@@ -243,9 +257,19 @@ async def mock_optimize(req: OptimizeRequest):
 
 @sio.event
 async def chat_message(sid, data):
-    message = data.get("message", "")
-    response = await chat_manager.chat(sid, message)
-    await sio.emit("chat_response", {"message": response}, to=sid)
+    try:
+        message = data.get("message", "")
+
+        response = await chat_manager.chat(sid, message)
+
+        await sio.emit("chat_response", {"message": response}, to=sid)
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+
+        await sio.emit("chat_response", {"message": f"[ERROR] {str(e)}"}, to=sid)
 
 
 # ----------------------------------------------------
@@ -267,4 +291,7 @@ async def home():
 # ----------------------------------------------------
 # Socket.IO ASGI application
 # ----------------------------------------------------
+# Socket.IO server
+
+# Combined FastAPI + Socket.IO ASGI application
 socket_app = socketio.ASGIApp(sio, other_asgi_app=app)

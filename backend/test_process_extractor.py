@@ -14,7 +14,7 @@ load_dotenv()
 
 
 def main():
-    extractor = ProcessExtractor(model="gpt-4.1-mini")
+    extractor = ProcessExtractor()
 
     input_file = "./test_data/Shakti AgroChem Industries Processes.pdf"
 

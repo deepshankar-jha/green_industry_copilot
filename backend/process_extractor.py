@@ -42,8 +42,7 @@ extractor.save_json(
 
 from pathlib import Path
 import json
-from openai import AzureOpenAI
-
+from langchain_openai import ChatOpenAI
 import docx
 from pypdf import PdfReader
 import os
@@ -76,7 +75,7 @@ class ProcessExtractor:
         If OPENAI_API_KEY is not defined.
     """
 
-    def __init__(self, model: str = "gpt-5-mini"):
+    def __init__(self):
         """
         Initialize the extractor and create the OpenAI client.
 
@@ -90,13 +89,13 @@ class ProcessExtractor:
         ValueError
             If OPENAI_API_KEY is not available.
         """
-        self.client = AzureOpenAI(
+        self.llm = ChatOpenAI(
             api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            base_url=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            model=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
+            temperature=0,
+            max_completion_tokens=30000,
         )
-
-        self.model = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 
     ###############################################################################
     # File Readers
@@ -223,54 +222,6 @@ class ProcessExtractor:
     # Converts raw document text into structured process information using
     # LangChain structured output and Pydantic schemas.
     ###############################################################################
-
-    def _sanitize_document(self, document_text: str) -> str:
-        """
-        Normalize document text before structured extraction.
-
-        Returns
-        -------
-        str
-            Sanitized plain text.
-        """
-
-        prompt = f"""
-    Rewrite the following industrial document into a normalized plain-text form.
-
-    Requirements:
-
-    - Preserve ALL information.
-    - Preserve process ordering.
-    - Preserve process names exactly.
-    - Do not summarize.
-    - Do not add information.
-    - Use ASCII characters only.
-    - Replace superscripts with ^ notation.
-
-    Examples:
-
-    m³/day -> m^3/day
-    m² -> m^2
-    CO₂ -> CO2
-
-    For money:
-
-    ₹7,50,000/day -> INR 750000/day
-    $1800/hour -> USD 1800/hour
-
-    Preserve section headings and process numbering.
-
-    Return plain text only.
-
-    Document:
-
-    {document_text}
-    """
-
-        response = self.llm.invoke(prompt)
-
-        return response.content
-
     def extract_processes(self, filepath: str):
         """
         Extract industrial process steps from a document.
@@ -292,31 +243,63 @@ class ProcessExtractor:
 
         document_text = self.load_file(filepath)
 
-        prompt = f"""
-Extract all industrial processes from the document.
+        prompt = f"""Rewrite the following industrial document into a normalized plain-text form and extract all industrial processes.
 
-Rules:
+Requirements for document normalization:
 
-- Preserve process ordering.
-- Preserve process names exactly.
-- Process names must be unique.
-- Never invent processes.
-- next_processes must contain process names, never IDs.
-- Every name inside next_processes must exactly match an existing process_name.
-- If downstream processes are unknown, use an empty list.
-- Use null for missing scalar values.
-- Use [] for missing lists.
-- Preserve all numerical values and units exactly.
+* Preserve ALL information.
+* Preserve process ordering.
+* Preserve process names exactly.
+* Do not summarize.
+* Do not add information.
+* Use ASCII characters only.
+* Replace superscripts with ^ notation.
+
+Examples:
+
+m³/day -> m^3/day
+m² -> m^2
+CO₂ -> CO2
+
+For money:
+
+₹7,50,000/day -> INR 750000/day
+$1800/hour -> USD 1800/hour
+
+* Preserve section headings and process numbering.
+* Return plain text only for the normalized document.
+
+Process extraction rules:
+
+* Extract all industrial processes from the document.
+* Preserve process ordering.
+* Preserve process names exactly as they appear in the normalized document.
+* Process names must be unique.
+* Never invent processes.
+* next_processes must contain process names, never IDs.
+* Every entry inside next_processes must exactly match the process_name of another extracted process.
+* Do not use abbreviations, aliases, or modified names in next_processes.
+* If a referenced downstream process does not exist among the extracted processes, use an empty list instead.
+* Use null for missing scalar values.
+* Use [] for missing lists.
+* Preserve all numerical values and units exactly.
+
+Validation rules:
+
+* Each process_name must be unique.
+* Every value appearing in next_processes must be an exact string match to an existing process_name.
+* next_processes must contain only valid process names from the extracted process list.
+* If there is any ambiguity about the downstream process name, use [] instead of guessing.
+* Never create or infer process names that are not explicitly present in the document.
 
 Document:
 
 {document_text}
 """
-        response = self.client.responses.parse(
-            model=self.model, input=prompt, text_format=ProcessList
-        )
 
-        result = response.output_parsed
+        structured_llm = self.llm.with_structured_output(ProcessList)
+
+        result = structured_llm.invoke(prompt)
 
         processes = [p.model_dump() for p in result.processes]
 
