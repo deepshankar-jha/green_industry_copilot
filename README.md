@@ -20,7 +20,7 @@ to create an industrial sustainability copilot capable of helping organizations 
 
 # Demo Video
 
-https://youtu.be/JeLZ5HWo-rQ
+https://youtu.be/grdD_DI5gpE
 
 ---
 
