@@ -213,7 +213,9 @@ async def upload_file(file: UploadFile = File(...), socket_id: str = Form(...)):
                 separators=(",", ":"),
             )
 
-        await asyncio.to_thread(foundry_iq.upload_graph, str(json_path), socket_id)
+        await asyncio.to_thread(
+            foundry_iq.upload_graph, str(json_path), socket_id, "original"
+        )
 
         await sio.emit(
             "process_status",
@@ -305,7 +307,7 @@ async def mock_upload(file: UploadFile = File(...), socket_id: str = Form(...)):
     with open(json_path, "r", encoding="utf-8") as f:
         processes = json.load(f)
 
-        await asyncio.to_thread(foundry_iq.upload_graph, str(json_path), socket_id)
+        await asyncio.to_thread(foundry_iq.upload_graph, str(json_path), socket_id,"original")
 
         chat_manager.update_original_graph(socket_id, processes)
 
@@ -387,7 +389,7 @@ async def optimize_graph(req: OptimizeRequest):
         )
 
     await asyncio.to_thread(
-        foundry_iq.upload_graph, str(optimized_graph_path), req.socket_id
+        foundry_iq.upload_graph, str(optimized_graph_path), req.socket_id,"optimized"
     )
 
     return {"status": "success", "optimized_processes": optimized_processes}
@@ -424,7 +426,7 @@ async def mock_optimize(req: OptimizeRequest):
 
     with open(json_path, "r", encoding="utf-8") as f:
         optimized_processes = json.load(f)
-    await asyncio.to_thread(foundry_iq.upload_graph, str(json_path), req.socket_id)
+    await asyncio.to_thread(foundry_iq.upload_graph, str(json_path), req.socket_id,"optimized")
 
     chat_manager.update_optimized_graph(req.socket_id, optimized_processes)
 

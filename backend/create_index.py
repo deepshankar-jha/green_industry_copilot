@@ -69,6 +69,7 @@ client = SearchIndexClient(endpoint=endpoint, credential=AzureKeyCredential(key)
 fields = [
     SimpleField(name="id", type=SearchFieldDataType.String, key=True),
     SimpleField(name="user_id", type=SearchFieldDataType.String, filterable=True),
+    SimpleField(name="graph_type", type=SearchFieldDataType.String, filterable=True),
     SearchableField(name="content", type=SearchFieldDataType.String),
     SimpleField(name="source", type=SearchFieldDataType.String, filterable=True),
 ]

@@ -62,7 +62,7 @@ class FoundryIQManager:
         if docs:
             self.client.delete_documents(docs)
 
-    def upload_graph(self, filepath: str, user_id: str):
+    def upload_graph(self, filepath: str, user_id: str, graph_type: str):
         """
         Upload process graph data into Azure Search.
 
@@ -73,9 +73,6 @@ class FoundryIQManager:
             filepath: Path to a JSON file containing process definitions.
             user_id: Unique identifier of the target user.
         """
-
-        # Ensure only the latest graph exists for the user.
-        self.clear_user_documents(user_id)
 
         # Load process definitions from disk.
         with open(filepath, "r", encoding="utf-8") as f:
@@ -91,6 +88,7 @@ class FoundryIQManager:
                 {
                     "id": str(uuid.uuid4()),
                     "user_id": user_id,
+                    "graph_type": graph_type,
                     "content": text,
                     "source": process["process_name"],
                 }
@@ -117,6 +115,20 @@ class FoundryIQManager:
         """
         results = self.client.search(
             search_text=query, filter=f"user_id eq '{user_id}'", top=top_k
+        )
+
+        knowledge = []
+
+        for doc in results:
+            knowledge.append(doc["content"])
+
+        return "\n\n".join(knowledge)
+
+    def retrieve_graph(self, user_id: str, graph_type: str):
+        results = self.client.search(
+            search_text="*",
+            filter=(f"user_id eq '{user_id}' " f"and graph_type eq '{graph_type}'"),
+            top=1000,
         )
 
         knowledge = []

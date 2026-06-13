@@ -463,23 +463,28 @@ class ChatManager:
         self.add_user_message(user_id, message)
 
         history = self.build_context(user_id)
-        
-        # Retrieve additional domain knowledge relevant to the
-        # current question. This enables the assistant to answer
-        # using external information instead of relying solely
-        # on chat history.
-        knowledge = self.foundry_iq.retrieve(query=message, user_id=user_id)
+
+        original_graph = self.get_original_graph(user_id)
+        optimized_graph = self.get_optimized_graph(user_id)
+
+        original_graph = self.foundry_iq.retrieve_graph(user_id, "original")
+
+        optimized_graph = self.foundry_iq.retrieve_graph(user_id, "optimized")
 
         prompt = f"""
-Retrieved Information:
+Original process graph
 
-{knowledge}
+{original_graph}
 
-Conversation History:
+Optimized process graph
+
+{optimized_graph}
+
+Conversation History
 
 {history}
 
-User Question:
+User Question
 
 {message}
 """
