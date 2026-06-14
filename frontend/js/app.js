@@ -158,7 +158,7 @@ class Application {
     formData.append("file", file);
     formData.append("socket_id", this.socketManager.getSocketId());
 
-    fetch("/mock-upload", {
+    fetch("/upload", {
       method: "POST",
       body: formData,
     }).catch((err) => {
@@ -392,7 +392,7 @@ class Application {
   optimizeProcessGraph(query) {
     this.showProcessingOverlay();
 
-    fetch("/mock-optimize", {
+    fetch("/optimize", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
